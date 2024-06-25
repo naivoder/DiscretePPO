@@ -70,7 +70,10 @@ def run_ppo(env_name, n_games=10000):
             history.append(score)
             avg_score = np.mean(history[-100:])
 
-        if i > 100 and avg_score > best_score:
+        diff = int(avg_score-best_score)
+        sign = "+" if diff >=0 else "-"
+
+        if avg_score > best_score:
             best_score = avg_score
             agent.save_checkpoints()
 
@@ -81,8 +84,7 @@ def run_ppo(env_name, n_games=10000):
                 "best_score": best_score,
             }
         )
-        diff = int(abs(avg_score-best_score))
-        sign = "+" if diff >=0 else "-"
+        
         print(
             f"[{env_name} Episode {i + 1:04}/{n_games}]   Average Score = {avg_score:7.4f} ({sign}{diff}) ",
             end="\r",
