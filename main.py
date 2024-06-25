@@ -28,8 +28,11 @@ environments = [
 ]
 
 
-def run_ppo(env_name, n_games=10000):
-    env = gym.make(env_name, render_mode="rgb_array")
+def run_ppo(env_name, n_games=10000, n_envs=4):
+    env = gym.vector.SyncVectorEnv(
+        [gym.make(env_name) for _ in range(n_envs)]
+    )
+    # env = gym.make(env_name, render_mode="rgb_array")
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
 
@@ -59,7 +62,7 @@ def run_ppo(env_name, n_games=10000):
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
-            n_steps += 1
+            n_steps += 1 * n_envs
             if n_steps % STEPS == 0:
                 agent.learn()
                 n_learn += 1
@@ -109,7 +112,7 @@ def save_best_version(env_name, agent, seeds=100):
         term, trunc = False, False
         while not term and not trunc:
             frames.append(env.render())
-            action, prob = agent.choose_action(state)
+            action, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
             total_reward += reward
             state = next_state
