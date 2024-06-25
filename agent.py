@@ -1,7 +1,6 @@
 import torch
 from networks import Actor, Critic
 from memory import ReplayBuffer
-import numpy as np
 
 
 class DiscretePPOAgent:
@@ -38,7 +37,7 @@ class DiscretePPOAgent:
 
     def choose_action(self, state):
         with torch.no_grad():
-            state = torch.FloatTensor(np.array(state)).to(self.actor.device)
+            state = torch.FloatTensor(state).to(self.actor.device)
 
             dist = self.actor(state)
             action = dist.sample()

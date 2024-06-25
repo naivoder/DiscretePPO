@@ -28,9 +28,11 @@ environments = [
 ]
 
 
-def run_ppo(env_name, n_games=50000):
+def run_ppo(env_name, n_games=10000):
     env = gym.make(env_name, render_mode="rgb_array")
-
+    print(f"Env: {env_name}") 
+    print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
+    
     agent = DiscretePPOAgent(
         env.observation_space.shape,
         env.action_space.n,
@@ -46,13 +48,14 @@ def run_ppo(env_name, n_games=50000):
 
     for i in range(n_games):
         state, _ = env.reset()
+        state = np.array(state).flatten()
 
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
 
             next_state, reward, term, trunc, _ = env.step(action)
-            score += reward
+            next_state = np.array(next_state).flatten()
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
@@ -61,6 +64,7 @@ def run_ppo(env_name, n_games=50000):
                 agent.learn()
                 n_learn += 1
 
+            score += reward
             state = next_state
 
             history.append(score)
@@ -123,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n",
         "--n_games",
-        default=50000,
+        default=10000,
         type=int,
         help="Number of episodes (games) to run during training",
     )
