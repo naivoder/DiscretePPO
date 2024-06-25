@@ -86,7 +86,7 @@ def run_ppo(env_name, n_games=10000):
         )
         
         print(
-            f"[{env_name} Episode {i + 1:04}/{n_games}]   Average Score = {avg_score:7.4f} ({sign}{diff}) ",
+            f"[{env_name} Episode {i + 1:04}/{n_games}]  Average Score = {avg_score:.2f} ({sign}{diff}) ",
             end="\r",
         )
 
