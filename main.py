@@ -10,29 +10,29 @@ import pandas as pd
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 environments = [
-    "CartPole-v1",
-    "MountainCar-v0",
-    "Acrobot-v1",
-    "LundarLander-v2",
     "ALE/Asteroids-v5",
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
     "ALE/Centipede-v5",
     "ALE/DonkeyKong-v5",
+    "ALE/DoubleDunk-v5",
     "ALE/Frogger-v5",
     "ALE/KungFuMaster-v5",
     "ALE/MarioBros-v5",
     "ALE/MsPacman-v5",
+    "ALE/Pong-v5",
+    "ALE/Seaquest-v5",
     "ALE/SpaceInvaders-v5",
     "ALE/Tetris-v5",
+    "ALE/VideoChess-v5",
 ]
 
 
 def run_ppo(env_name, n_games=10000):
     env = gym.make(env_name, render_mode="rgb_array")
-    print(f"Env: {env_name}") 
+    print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
-    
+
     agent = DiscretePPOAgent(
         env.observation_space.shape,
         env.action_space.n,
@@ -48,14 +48,14 @@ def run_ppo(env_name, n_games=10000):
 
     for i in range(n_games):
         state, _ = env.reset()
-        state = np.array(state).flatten()
+        state = np.array(state, dtype=np.float32).flatten()
 
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
 
             next_state, reward, term, trunc, _ = env.step(action)
-            next_state = np.array(next_state).flatten()
+            next_state = np.array(next_state, dtype=np.float32).flatten()
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 

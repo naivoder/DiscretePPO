@@ -37,7 +37,7 @@ class DiscretePPOAgent:
 
     def choose_action(self, state):
         with torch.no_grad():
-            state = torch.FloatTensor(state).to(self.actor.device)
+            state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
 
             dist = self.actor(state)
             action = dist.sample()
