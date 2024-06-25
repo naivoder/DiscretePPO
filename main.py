@@ -36,7 +36,7 @@ def run_ppo(env_name, n_games=10000):
     agent = DiscretePPOAgent(
         env.observation_space.shape,
         env.action_space.n,
-        alpha=3e-4,
+        alpha=3e-5,
         n_epochs=10,
         batch_size=64,
     )
@@ -77,14 +77,14 @@ def run_ppo(env_name, n_games=10000):
         metrics.append(
             {
                 "episode": i + 1,
-                "score": score,
                 "average_score": avg_score,
                 "best_score": best_score,
             }
         )
-
+        diff = int(abs(avg_score-best_score))
+        sign = "+" if diff >=0 else "-"
         print(
-            f"[{env_name} Episode {i + 1:04}/{n_games}]    Score = {score:7.4f}    Average = {avg_score:7.4f}",
+            f"[{env_name} Episode {i + 1:04}/{n_games}]   Average Score = {avg_score:7.4f} ({sign}{diff}) ",
             end="\r",
         )
 
