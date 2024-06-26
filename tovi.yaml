@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: job
 spec:
-  location: /Users/naivoder/Code/DiscreteProximalPolicyOptimization/
+  location: /Users/naivoder/Code/DiscreteProximalPolicyOptmization/
   name: DiscretePPO
   project: none
 
@@ -28,7 +28,7 @@ spec:
   entrypoint: "python {{path}}/main.py --env {{env.value}}"
 
   gpu: 1
-  ram: 32
+  ram: 32G
   cpu: 2
 
   image: registry.gitlab.com/r-dex-systems/containers/pytorch:rl
