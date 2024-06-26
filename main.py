@@ -6,10 +6,17 @@ import os
 import warnings
 from argparse import ArgumentParser
 import pandas as pd
+import os
+
+os.makedirs("weights", exist_ok=True)
+os.makedirs("metrics", exist_ok=True)
+os.makedirs("environments", exist_ok=True)
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 environments = [
+    "CartPole-v1",
+    "MountainCar-v0",
     "ALE/Asteroids-v5",
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
@@ -28,11 +35,8 @@ environments = [
 ]
 
 
-def run_ppo(env_name, n_games=10000, n_envs=4):
-    env = gym.vector.SyncVectorEnv(
-        [gym.make(env_name) for _ in range(n_envs)]
-    )
-    # env = gym.make(env_name, render_mode="rgb_array")
+def run_ppo(env_name, n_games=10000):
+    env = gym.make(env_name, render_mode="rgb_array")
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
 
@@ -40,8 +44,8 @@ def run_ppo(env_name, n_games=10000, n_envs=4):
         env.observation_space.shape,
         env.action_space.n,
         alpha=3e-5,
-        n_epochs=10,
-        batch_size=64,
+        n_epochs=5,
+        batch_size=256,
     )
 
     STEPS = 2048
@@ -62,7 +66,7 @@ def run_ppo(env_name, n_games=10000, n_envs=4):
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
-            n_steps += 1 * n_envs
+            n_steps += 1
             if n_steps % STEPS == 0:
                 agent.learn()
                 n_learn += 1
@@ -70,11 +74,8 @@ def run_ppo(env_name, n_games=10000, n_envs=4):
             score += reward
             state = next_state
 
-            history.append(score)
-            avg_score = np.mean(history[-100:])
-
-        diff = int(avg_score-best_score)
-        sign = "+" if diff >=0 else "-"
+        history.append(score)
+        avg_score = np.mean(history[-100:])
 
         if avg_score > best_score:
             best_score = avg_score
@@ -87,9 +88,9 @@ def run_ppo(env_name, n_games=10000, n_envs=4):
                 "best_score": best_score,
             }
         )
-        
+
         print(
-            f"[{env_name} Episode {i + 1:04}/{n_games}]  Average Score = {avg_score:.2f} ({sign}{diff}) ",
+            f"[{env_name} Episode {i + 1:04}/{n_games}]  Average Score = {avg_score:.2f}",
             end="\r",
         )
 
