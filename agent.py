@@ -21,7 +21,7 @@ class DiscretePPOAgent:
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
         self.gae_lambda = gae_lambda
-        self.entropy_coefficient = 1e-3
+        self.entropy_coefficient = 1e-2
         self.actor = Actor(
             input_dims, n_actions, alpha, chkpt_dir=f"weights/{self.env_name}_actor.pt"
         )
