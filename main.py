@@ -98,6 +98,14 @@ def run_ppo(env_name, n_games=10000, horizon=2048, batch_size=64):
     return history, metrics, best_score, agent
 
 
+def save_results(env_name, history, metrics, agent):
+    save_prefix = env_name.split("/")[-1]
+    utils.plot_running_avg(history, save_prefix)
+    df = pd.DataFrame(metrics)
+    df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
+    save_best_version(env_name, agent)
+
+
 def save_best_version(env_name, agent, seeds=100):
     agent.load_checkpoints()
 
@@ -165,20 +173,10 @@ if __name__ == "__main__":
         history, metrics, best_score, trained_agent = run_ppo(
             args.env, args.n_games, args.n_steps, args.batch_size
         )
-
-        save_prefix = args.env.split("/")[-1]
-        utils.plot_running_avg(history, save_prefix)
-        df = pd.DataFrame(metrics)
-        df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
-        save_best_version(args.env, trained_agent)
+        save_results(args.env, history, metrics)
     else:
         for env_name in environments:
             history, metrics, best_score, trained_agent = run_ppo(
                 env_name, args.n_games, args.n_steps, args.batch_size
             )
-
-            save_prefix = env_name.split("/")[-1]
-            utils.plot_running_avg(history, save_prefix)
-            df = pd.DataFrame(metrics)
-            df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
-            save_best_version(env_name, trained_agent)
+            save_results(env_name, history, metrics)
