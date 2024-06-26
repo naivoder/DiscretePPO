@@ -1,5 +1,6 @@
-import torch 
+import torch
 import numpy as np
+
 
 class Actor(torch.nn.Module):
     def __init__(
@@ -18,7 +19,7 @@ class Actor(torch.nn.Module):
         self.h1_size = h1_size
         self.h2_size = h2_size
         self.chkpt_dir = chkpt_dir
-        
+
         self.h1_layer = torch.nn.Linear(np.prod(self.input_dims), self.h1_size)
         self.h2_layer = torch.nn.Linear(self.h1_size, self.h2_size)
         self.output = torch.nn.Linear(self.h2_size, self.n_actions)
@@ -38,6 +39,7 @@ class Actor(torch.nn.Module):
 
     def load_checkpoint(self):
         self.load_state_dict(torch.load(self.chkpt_dir))
+
 
 class Critic(torch.nn.Module):
     def __init__(

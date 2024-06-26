@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: job
 spec:
-  location: /Users/naivoder/Code/DiscreteProximalPolicyOptmization/
+  location: /Users/naivoder/Code/DiscreteProximalPolicyOptimization/
   name: DiscretePPO
   project: none
 
