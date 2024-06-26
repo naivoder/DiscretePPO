@@ -16,16 +16,17 @@ class DiscretePPOAgent:
         batch_size=64,
         n_epochs=10,
     ):
+        self.env_name = env_name.split("/")[-1]
         self.gamma = gamma
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
         self.gae_lambda = gae_lambda
         self.entropy_coefficient = 1e-3
         self.actor = Actor(
-            input_dims, n_actions, alpha, chkpt_dir=f"weights/{env_name}_actor.pt"
+            input_dims, n_actions, alpha, chkpt_dir=f"weights/{self.env_name}_actor.pt"
         )
         self.critic = Critic(
-            input_dims, alpha, chkpt_dir=f"weights/{env_name}_critic.pt"
+            input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
         )
         self.memory = ReplayBuffer(batch_size)
 
