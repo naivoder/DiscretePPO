@@ -12,7 +12,7 @@ os.makedirs("weights", exist_ok=True)
 os.makedirs("metrics", exist_ok=True)
 os.makedirs("environments", exist_ok=True)
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.simplefilter("ignore")
 
 environments = [
     "CartPole-v1",
@@ -106,16 +106,18 @@ def save_best_version(env_name, agent, seeds=100):
 
     for _ in range(seeds):
         env = gym.make(env_name, render_mode="rgb_array")
+        state, _ = env.reset()
+        state = np.array(state, dtype=np.float32).flatten()
 
         frames = []
         total_reward = 0
 
-        state, _ = env.reset()
         term, trunc = False, False
         while not term and not trunc:
             frames.append(env.render())
             action, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
+            next_state = np.array(next_state, dtype=np.float32).flatten()
             total_reward += reward
             state = next_state
 
@@ -123,7 +125,8 @@ def save_best_version(env_name, agent, seeds=100):
             best_total_reward = total_reward
             best_frames = frames
 
-    utils.save_animation(best_frames, f"environments/{env_name}.gif")
+    save_prefix = env_name.split("/")[-1]
+    utils.save_animation(best_frames, f"environments/{save_prefix}.gif")
 
 
 if __name__ == "__main__":
@@ -162,16 +165,20 @@ if __name__ == "__main__":
         history, metrics, best_score, trained_agent = run_ppo(
             args.env, args.n_games, args.n_steps, args.batch_size
         )
-        utils.plot_running_avg(history, args.env)
+
+        save_prefix = args.env.split("/")[-1]
+        utils.plot_running_avg(history, save_prefix)
         df = pd.DataFrame(metrics)
-        df.to_csv(f"metrics/{args.env}_metrics.csv", index=False)
+        df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
         save_best_version(args.env, trained_agent)
     else:
         for env_name in environments:
             history, metrics, best_score, trained_agent = run_ppo(
                 env_name, args.n_games, args.n_steps, args.batch_size
             )
-            utils.plot_running_avg(history, env_name)
+
+            save_prefix = env_name.split("/")[-1]
+            utils.plot_running_avg(history, save_prefix)
             df = pd.DataFrame(metrics)
-            df.to_csv(f"metrics/{env_name}_metrics.csv", index=False)
+            df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
             save_best_version(env_name, trained_agent)
