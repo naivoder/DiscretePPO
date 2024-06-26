@@ -41,6 +41,7 @@ def run_ppo(env_name, n_games=10000):
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
 
     agent = DiscretePPOAgent(
+        env_name,
         env.observation_space.shape,
         env.action_space.n,
         alpha=3e-5,

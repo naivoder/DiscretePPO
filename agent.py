@@ -6,6 +6,7 @@ from memory import ReplayBuffer
 class DiscretePPOAgent:
     def __init__(
         self,
+        env_name,
         input_dims,
         n_actions,
         gamma=0.99,
@@ -20,8 +21,12 @@ class DiscretePPOAgent:
         self.n_epochs = n_epochs
         self.gae_lambda = gae_lambda
         self.entropy_coefficient = 1e-3
-        self.actor = Actor(input_dims, n_actions, alpha)
-        self.critic = Critic(input_dims, alpha)
+        self.actor = Actor(
+            input_dims, n_actions, alpha, chkpt_dir=f"weights/{env_name}_actor.pt"
+        )
+        self.critic = Critic(
+            input_dims, alpha, chkpt_dir=f"weights/{env_name}_critic.pt"
+        )
         self.memory = ReplayBuffer(batch_size)
 
     def remember(self, state, state_, action, probs, reward, done):
