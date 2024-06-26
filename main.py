@@ -17,6 +17,8 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 environments = [
     "CartPole-v1",
     "MountainCar-v0",
+    "Acrobot-v1",
+    "LunarLander-v2",
     "ALE/Asteroids-v5",
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
@@ -35,7 +37,7 @@ environments = [
 ]
 
 
-def run_ppo(env_name, n_games=10000):
+def run_ppo(env_name, n_games=10000, horizon=2048, batch_size=64):
     env = gym.make(env_name, render_mode="rgb_array")
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
@@ -44,14 +46,12 @@ def run_ppo(env_name, n_games=10000):
         env_name,
         env.observation_space.shape,
         env.action_space.n,
-        alpha=3e-5,
-        n_epochs=5,
-        batch_size=256,
+        alpha=3e-4,
+        n_epochs=3,
+        batch_size=batch_size,
     )
 
-    STEPS = 2048
-
-    n_steps, n_learn, best_score = 0, 0, env.reward_range[0]
+    n_steps, n_learn, best_score = 0, 0, float("-inf")
     history, metrics = [], []
 
     for i in range(n_games):
@@ -68,7 +68,7 @@ def run_ppo(env_name, n_games=10000):
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
             n_steps += 1
-            if n_steps % STEPS == 0:
+            if n_steps > batch_size and n_steps % horizon == 0:
                 agent.learn()
                 n_learn += 1
 
@@ -138,6 +138,20 @@ if __name__ == "__main__":
         type=int,
         help="Number of episodes (games) to run during training",
     )
+    parser.add_argument(
+        "-s",
+        "--n_steps",
+        default=2048,
+        type=int,
+        help="Horizon, number of steps between learning",
+    )
+    parser.add_argument(
+        "-b",
+        "--batch_size",
+        default=64,
+        type=int,
+        help="Batch size for learning",
+    )
     args = parser.parse_args()
 
     for fname in ["metrics", "environments", "weights"]:
@@ -145,7 +159,9 @@ if __name__ == "__main__":
             os.makedirs(fname)
 
     if args.env:
-        history, metrics, best_score, trained_agent = run_ppo(args.env, args.n_games)
+        history, metrics, best_score, trained_agent = run_ppo(
+            args.env, args.n_games, args.n_steps, args.batch_size
+        )
         utils.plot_running_avg(history, args.env)
         df = pd.DataFrame(metrics)
         df.to_csv(f"metrics/{args.env}_metrics.csv", index=False)
@@ -153,7 +169,7 @@ if __name__ == "__main__":
     else:
         for env_name in environments:
             history, metrics, best_score, trained_agent = run_ppo(
-                env_name, args.n_games
+                env_name, args.n_games, args.n_steps, args.batch_size
             )
             utils.plot_running_avg(history, env_name)
             df = pd.DataFrame(metrics)

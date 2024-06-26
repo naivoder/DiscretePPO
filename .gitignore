@@ -1,8 +1,6 @@
 .DS_Store
 *.pt
 weights/*
-metrics/*
-environments*
 
 
 # Byte-compiled / optimized / DLL files
