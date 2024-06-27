@@ -37,7 +37,7 @@ environments = [
 ]
 
 
-def run_ppo(env_name, n_games=10000, horizon=2048, batch_size=64):
+def run_ppo(env_name, n_games=10000, n_epochs=3, horizon=128, batch_size=256):
     env = gym.make(env_name, render_mode="rgb_array")
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
@@ -47,7 +47,7 @@ def run_ppo(env_name, n_games=10000, horizon=2048, batch_size=64):
         env.observation_space.shape,
         env.action_space.n,
         alpha=3e-4,
-        n_epochs=3,
+        n_epochs=n_epochs,
         batch_size=batch_size,
     )
 
@@ -150,16 +150,22 @@ if __name__ == "__main__":
         help="Number of episodes (games) to run during training",
     )
     parser.add_argument(
+        "--n_epochs",
+        default=3,
+        type=int,
+        help="Number of epochs during learning",
+    )
+    parser.add_argument(
         "-s",
         "--n_steps",
-        default=2048,
+        default=128,
         type=int,
         help="Horizon, number of steps between learning",
     )
     parser.add_argument(
         "-b",
         "--batch_size",
-        default=64,
+        default=256,
         type=int,
         help="Batch size for learning",
     )
@@ -171,12 +177,12 @@ if __name__ == "__main__":
 
     if args.env:
         history, metrics, best_score, trained_agent = run_ppo(
-            args.env, args.n_games, args.n_steps, args.batch_size
+            args.env, args.n_games, args.n_epochs, args.n_steps, args.batch_size
         )
         save_results(args.env, history, metrics)
     else:
         for env_name in environments:
             history, metrics, best_score, trained_agent = run_ppo(
-                env_name, args.n_games, args.n_steps, args.batch_size
+                env_name, args.n_games, args.n_epochs, args.n_steps, args.batch_size
             )
             save_results(env_name, history, metrics)
