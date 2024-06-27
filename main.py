@@ -37,7 +37,7 @@ environments = [
 ]
 
 
-def run_ppo(env_name, n_games=10000, n_epochs=3, horizon=128, batch_size=256):
+def run_ppo(env_name, n_games, n_epochs, horizon, batch_size):
     env = gym.make(env_name, render_mode="rgb_array")
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n",
         "--n_games",
-        default=10000,
+        default=50000,
         type=int,
         help="Number of episodes (games) to run during training",
     )
