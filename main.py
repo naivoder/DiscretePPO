@@ -179,10 +179,10 @@ if __name__ == "__main__":
         history, metrics, best_score, trained_agent = run_ppo(
             args.env, args.n_games, args.n_epochs, args.n_steps, args.batch_size
         )
-        save_results(args.env, history, metrics)
+        save_results(args.env, history, metrics, trained_agent)
     else:
         for env_name in environments:
             history, metrics, best_score, trained_agent = run_ppo(
                 env_name, args.n_games, args.n_epochs, args.n_steps, args.batch_size
             )
-            save_results(env_name, history, metrics)
+            save_results(env_name, history, metrics, trained_agent)
