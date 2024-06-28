@@ -1,7 +1,7 @@
 .DS_Store
 *.pt
 weights/*
-
+tovi/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
