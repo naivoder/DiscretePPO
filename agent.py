@@ -12,7 +12,7 @@ class DiscretePPOAgent:
         gamma=0.99,
         alpha=3e-4,
         gae_lambda=0.95,
-        policy_clip=0.2,
+        policy_clip=0.1,
         batch_size=64,
         n_epochs=10,
         max_grad_norm=0.5,
