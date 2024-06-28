@@ -43,6 +43,8 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
 
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
+    
+    preprocess = True if len(env.observation_space.shape) == 3 else False
 
     agent = DiscretePPOAgent(
         env_name,
@@ -63,16 +65,20 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
 
     for i in range(n_games):
         state, _ = env.reset()
-        state = np.array(state, dtype=np.float32).flatten()
-        state = utils.preprocess_frame(state)
+        if preprocess:
+            state = utils.preprocess_frame(np.array(state, dtype=np.float32)).flatten()
+        else:
+            state = np.array(state, dtype=np.float32).flatten()
 
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
 
             next_state, reward, term, trunc, _ = env.step(action)
-            next_state = np.array(next_state, dtype=np.float32).flatten()
-            next_state = utils.preprocess_frame(next_state)
+            if preprocess:
+                next_state = utils.preprocess_frame(np.array(next_state, dtype=np.float32)).flatten()
+            else:
+                next_state = np.array(next_state, dtype=np.float32).flatten()
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
