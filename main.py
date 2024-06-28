@@ -37,8 +37,10 @@ environments = [
 ]
 
 
-def run_ppo(env_name, n_games, n_epochs, horizon, batch_size):
+def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=False):
     env = gym.make(env_name, render_mode="rgb_array")
+    save_prefix = env_name.split("/")[-1]
+
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
 
@@ -51,12 +53,18 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size):
         batch_size=batch_size,
     )
 
+    # continue training from saved checkpoint
+    if continue_training:
+        if os.path.exists(f"weights/{save_prefix}_actor.pt"):
+            agent.load_checkpoints()
+
     n_steps, n_learn, best_score = 0, 0, float("-inf")
     history, metrics = [], []
 
     for i in range(n_games):
         state, _ = env.reset()
         state = np.array(state, dtype=np.float32).flatten()
+        state = utils.preprocess_frame(state)
 
         term, trunc, score = False, False, 0
         while not term and not trunc:
@@ -64,6 +72,7 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size):
 
             next_state, reward, term, trunc, _ = env.step(action)
             next_state = np.array(next_state, dtype=np.float32).flatten()
+            next_state = utils.preprocess_frame(next_state)
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
