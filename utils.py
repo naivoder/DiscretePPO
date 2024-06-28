@@ -1,12 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import imageio
+import cv2
+
+
+def preprocess_frame(state):
+    grayscale = cv2.cvtColor(state, cv2.COLOR_BGR2GRAY)
+    resized = cv2.resize(grayscale, (84, 84), interpolation=cv2.INTER_AREA)
+    return np.expand_dims(resized, axis=2)
 
 
 def save_animation(frames, filename):
     with imageio.get_writer(filename, mode="I", loop=0) as writer:
         for frame in frames:
             writer.append_data(frame)
+
 
 def plot_running_avg(scores, env):
     """
@@ -43,4 +51,3 @@ def plot_running_avg(scores, env):
     plt.ylabel("Average Score")
     plt.grid(True)
     plt.savefig(f"metrics/{env}_running_avg.png")
-
