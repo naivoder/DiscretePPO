@@ -39,8 +39,8 @@ python main.py --env 'LunarLander-v2'
             <img src="environments/Acrobot-v1.gif" width="250" height="250"/>
         </td>
         <td>
-            <p><b>LundarLander-v2</b></p>
-            <img src="environments/LundarLander-v2.gif" width="250" height="250"/>
+            <p><b>LunarLander-v2</b></p>
+            <img src="environments/LunarLander-v2.gif" width="250" height="250"/>
         </td>
     </tr>
     <tr>
@@ -54,7 +54,7 @@ python main.py --env 'LunarLander-v2'
             <img src="metrics/Acrobot-v1_running_avg.png" width="250" height="250"/>
         </td>
         <td>
-            <img src="metrics/LundarLander-v2_running_avg.png" width="250" height="250"/>
+            <img src="metrics/LunarLander-v2_running_avg.png" width="250" height="250"/>
         </td>
     </tr>
 </table>
