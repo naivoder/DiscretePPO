@@ -38,6 +38,10 @@ python main.py --env 'LunarLander-v2'
             <p><b>Acrobot-v1</b></p>
             <img src="environments/Acrobot-v1.gif" width="250" height="250"/>
         </td>
+        <td>
+            <p><b>LundarLander-v2</b></p>
+            <img src="environments/LundarLander-v2.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -49,9 +53,12 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/Acrobot-v1_running_avg.png" width="250" height="250"/>
         </td>
+        <td>
+            <img src="metrics/LundarLander-v2_running_avg.png" width="250" height="250"/>
+        </td>
     </tr>
 </table>
-<table>
+<!-- <table>
     <tr>
         <td>
             <p><b>LundarLander-v2</b></p>
@@ -158,7 +165,7 @@ python main.py --env 'LunarLander-v2'
             <img src="metrics/Tetris-v5_running_avg.png" width="250" height="250"/>
         </td>
     </tr>
-</table>
+</table> -->
 
 It's very interesting that PPO struggles to solve the MountainCar environment (solved easily by DDPG). I found this comment from `/u/jurniss` on Reddit very insightful:
 

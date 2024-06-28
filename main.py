@@ -15,11 +15,15 @@ os.makedirs("environments", exist_ok=True)
 warnings.simplefilter("ignore")
 
 environments = [
-    "CartPole-v1",
+    "CartPole-v1",          # gymnasium environments
     "MountainCar-v0",
     "Acrobot-v1",
     "LunarLander-v2",
-    "ALE/Asteroids-v5",
+    "Blackjack-v1",
+    "Taxi-v3",
+    "CliffWalking-v0",
+    "FrozenLake-v1",
+    "ALE/Asteroids-v5",     # atari environments
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
     "ALE/Centipede-v5",
