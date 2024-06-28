@@ -29,6 +29,16 @@ class Actor(torch.nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
+        self.init_layers()
+
+    def init_layers(self):
+        torch.nn.init.orthogonal_(self.h1_layer.weight, np.sqrt(2))
+        torch.nn.init.constant_(self.h1_layer.bias, 0)
+        torch.nn.init.orthogonal_(self.h2_layer.weight, np.sqrt(2))
+        torch.nn.init.constant_(self.h2_layer.bias, 0)
+        torch.nn.init.orthogonal_(self.output.weight, 0.01)
+        torch.nn.init.constant_(self.output.bias, 0)
+
     def forward(self, x):
         x = torch.nn.functional.tanh(self.h1_layer(x))
         x = torch.nn.functional.tanh(self.h2_layer(x))
@@ -65,6 +75,16 @@ class Critic(torch.nn.Module):
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
+
+        self.init_layers()
+
+    def init_layers(self):
+        torch.nn.init.orthogonal_(self.h1_layer.weight, np.sqrt(2))
+        torch.nn.init.constant_(self.h1_layer.bias, 0)
+        torch.nn.init.orthogonal_(self.h2_layer.weight, np.sqrt(2))
+        torch.nn.init.constant_(self.h2_layer.bias, 0)
+        torch.nn.init.orthogonal_(self.output.weight, 1.0)
+        torch.nn.init.constant_(self.output.bias, 0)
 
     def forward(self, x):
         x = torch.nn.functional.tanh(self.h1_layer(x))

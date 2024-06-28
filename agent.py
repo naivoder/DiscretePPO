@@ -15,13 +15,16 @@ class DiscretePPOAgent:
         policy_clip=0.2,
         batch_size=64,
         n_epochs=10,
+        max_grad_norm=0.5,
+        entropy_coefficient=1e-2,
     ):
         self.env_name = env_name.split("/")[-1]
         self.gamma = gamma
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
         self.gae_lambda = gae_lambda
-        self.entropy_coefficient = 1e-2
+        self.entropy_coefficient = entropy_coefficient
+        self.max_grad_norm = max_grad_norm
         self.actor = Actor(
             input_dims, n_actions, alpha, chkpt_dir=f"weights/{self.env_name}_actor.pt"
         )
@@ -55,21 +58,21 @@ class DiscretePPOAgent:
         )
 
     def calc_adv_and_returns(self, memories):
-        states, new_states, r, dones = memories
+        states, new_states, rewards, dones = memories
         with torch.no_grad():
             values = self.critic(states)
             values_ = self.critic(new_states)
-            deltas = r + self.gamma * values_ - values
+            deltas = rewards + self.gamma * values_ - values
             deltas = deltas.cpu().flatten().numpy()
             adv = [0]
-            for dlt, mask in zip(deltas[::-1], dones[::-1]):
-                advantage = dlt + self.gamma * self.gae_lambda * adv[-1] * (1 - mask)
+            for delta, done in zip(deltas[::-1], dones[::-1]):
+                advantage = delta + self.gamma * self.gae_lambda * adv[-1] * (1 - done)
                 adv.append(advantage)
             adv.reverse()
             adv = adv[:-1]
             adv = torch.tensor(adv).float().unsqueeze(1).to(self.critic.device)
             returns = adv + values
-            adv = (adv - adv.mean()) / (adv.std() + 1e-4)
+            adv = (adv - adv.mean()) / (adv.std() + 1e-8)
         return adv, returns
 
     def learn(self):
@@ -81,10 +84,10 @@ class DiscretePPOAgent:
         action_arr = torch.FloatTensor(action_arr).to(self.critic.device)
         old_prob_arr = torch.FloatTensor(old_prob_arr).to(self.critic.device)
         new_state_arr = torch.FloatTensor(new_state_arr).to(self.critic.device)
-        r = torch.FloatTensor(reward_arr).unsqueeze(1).to(self.critic.device)
+        reward_arr = torch.FloatTensor(reward_arr).unsqueeze(1).to(self.critic.device)
 
-        adv, returns = self.calc_adv_and_returns(
-            (state_arr, new_state_arr, r, dones_arr)
+        advantages, returns = self.calc_adv_and_returns(
+            (state_arr, new_state_arr, reward_arr, dones_arr)
         )
 
         for _ in range(self.n_epochs):
@@ -100,18 +103,21 @@ class DiscretePPOAgent:
                     new_probs.sum(-1, keepdim=True) - old_probs.sum(-1, keepdim=True)
                 )
 
-                weighted_probs = adv[batch] * prob_ratio
+                weighted_probs = advantages[batch] * prob_ratio
                 weighted_clipped_probs = (
                     torch.clamp(prob_ratio, 1 - self.policy_clip, 1 + self.policy_clip)
-                    * adv[batch]
+                    * advantages[batch]
                 )
 
-                entropy = dist.entropy().sum(-1, keepdims=True)
-                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs)
+                entropy = torch.mean(dist.entropy())
+                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs).mean()
                 actor_loss -= self.entropy_coefficient * entropy
 
                 self.actor.optimizer.zero_grad()
-                actor_loss.mean().backward()
+                actor_loss.backward()
+                torch.nn.utils.clip_grad_norm_(
+                    self.actor.parameters(), self.max_grad_norm
+                )
                 self.actor.optimizer.step()
 
                 critic_value = self.critic(states)
@@ -119,6 +125,9 @@ class DiscretePPOAgent:
 
                 self.critic.optimizer.zero_grad()
                 critic_loss.backward()
+                torch.nn.utils.clip_grad_norm_(
+                    self.critic.parameters(), self.max_grad_norm
+                )
                 self.critic.optimizer.step()
 
         self.memory.clear_memory()
