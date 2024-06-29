@@ -44,7 +44,7 @@ def clip_reward(reward):
     else:
         return reward 
 
-def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=False):
+def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=True):
     env = gym.make(env_name, render_mode="rgb_array")
     save_prefix = env_name.split("/")[-1]
 
@@ -140,10 +140,16 @@ def save_best_version(env_name, agent, seeds=100):
     best_total_reward = float("-inf")
     best_frames = None
 
+    preprocess = True if "ALE" in env_name else False
+
     for _ in range(seeds):
         env = gym.make(env_name, render_mode="rgb_array")
         state, _ = env.reset()
         state = np.array(state, dtype=np.float32).flatten()
+        if preprocess:
+            state = utils.preprocess_frame(np.array(state, dtype=np.float32)).flatten()
+        else:
+            state = np.array(state, dtype=np.float32).flatten()
 
         frames = []
         total_reward = 0
