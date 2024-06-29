@@ -19,10 +19,6 @@ environments = [
     "MountainCar-v0",
     "Acrobot-v1",
     "LunarLander-v2",
-    "Blackjack-v1",
-    "Taxi-v3",
-    "CliffWalking-v0",
-    "FrozenLake-v1",
     "ALE/Asteroids-v5",     # atari environments
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
@@ -33,13 +29,20 @@ environments = [
     "ALE/KungFuMaster-v5",
     "ALE/MarioBros-v5",
     "ALE/MsPacman-v5",
-    "ALE/Pong-v5",
+    "ALE/Pong-v4",
     "ALE/Seaquest-v5",
     "ALE/SpaceInvaders-v5",
     "ALE/Tetris-v5",
     "ALE/VideoChess-v5",
 ]
 
+def clip_reward(reward):
+    if reward < -1:
+        return -1
+    elif reward > 1:
+        return 1
+    else:
+        return reward 
 
 def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=False):
     env = gym.make(env_name, render_mode="rgb_array")
@@ -48,11 +51,15 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
     
-    preprocess = True if len(env.observation_space.shape) == 3 else False
-
+    preprocess = True if "ALE" in env_name else False
+    if preprocess:
+        shape = (84, 84, 1)
+    else:
+        shape = (env.observation_space.shape)
+ 
     agent = DiscretePPOAgent(
         env_name,
-        env.observation_space.shape,
+        shape,
         env.action_space.n,
         alpha=3e-4,
         n_epochs=n_epochs,
@@ -77,8 +84,10 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
-
+            
             next_state, reward, term, trunc, _ = env.step(action)
+            reward = clip_reward(reward)
+
             if preprocess:
                 next_state = utils.preprocess_frame(np.array(next_state, dtype=np.float32)).flatten()
             else:
