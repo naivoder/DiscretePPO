@@ -145,7 +145,7 @@ def save_best_version(env_name, agent, seeds=100):
     for _ in range(seeds):
         env = gym.make(env_name, render_mode="rgb_array")
         state, _ = env.reset()
-        state = np.array(state, dtype=np.float32).flatten()
+        state = np.array(state, dtype=np.float32)
         if preprocess:
             state = utils.preprocess_frame(np.array(state, dtype=np.float32)).flatten()
         else:
@@ -159,7 +159,10 @@ def save_best_version(env_name, agent, seeds=100):
             frames.append(env.render())
             action, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
-            next_state = np.array(next_state, dtype=np.float32).flatten()
+            if preprocess:
+                next_state = utils.preprocess_frame(np.array(next_state, dtype=np.float32)).flatten()
+            else:
+                next_state = np.array(next_state, dtype=np.float32).flatten() 
             total_reward += reward
             state = next_state
 
