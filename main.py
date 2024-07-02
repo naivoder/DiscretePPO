@@ -74,6 +74,8 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
 
     for i in range(n_games):
         state, _ = env.reset()
+        if i == 0:
+            utils.save_sample_state(state)
         if preprocess:
             state = utils.preprocess_frame(state)
             state_buffer = deque(
@@ -88,7 +90,7 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
             action, prob = agent.choose_action(state)
 
             next_state, reward, term, trunc, _ = env.step(action)
-            # reward = clip_reward(reward)
+            reward = clip_reward(reward)
 
             if preprocess:
                 next_state = utils.preprocess_frame(next_state)
