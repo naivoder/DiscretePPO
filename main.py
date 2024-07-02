@@ -74,9 +74,10 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
 
     for i in range(n_games):
         state, _ = env.reset()
-        if i == 0:
-            utils.save_sample_state(state)
+
         if preprocess:
+            if i == 0:  # only do this for an atari env
+                utils.save_sample_state(state)
             state = utils.preprocess_frame(state)
             state_buffer = deque(
                 [state] * 3, maxlen=3
