@@ -96,3 +96,69 @@ class Critic(torch.nn.Module):
 
     def load_checkpoint(self):
         self.load_state_dict(torch.load(self.chkpt_dir))
+
+
+class CNNActor(torch.nn.Module):
+    def __init__(self, input_dims, n_actions, alpha=3e-4, chkpt_dir="weights/actor.pt"):
+        super(CNNActor, self).__init__()
+        self.input_dims = input_dims
+        self.n_actions = n_actions
+        self.chkpt_dir = chkpt_dir
+
+        self.model = torch.nn.Sequential(
+            torch.nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 64, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(64, 64, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            torch.nn.Flatten(),
+            torch.nn.Linear(64 * 9 * 9, 256),
+            torch.nn.ReLU(),
+            torch.nn.Linear(256, n_actions),
+        )
+        self.optimizer = torch.optim.Adam(self.parameters(), alpha, amsgrad=True)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
+
+    def forward(self, x):
+        x = self.model(x)
+        return torch.distributions.Categorical(logits=x)
+
+    def save_checkpoint(self):
+        torch.save(self.state_dict(), self.chkpt_dir)
+
+    def load_checkpoint(self):
+        self.load_state_dict(torch.load(self.chkpt_dir))
+
+
+class CNNCritic(torch.nn.Module):
+    def __init__(self, input_dims, alpha=3e-4, chkpt_dir="weights/critic.pt"):
+        super(CNNCritic, self).__init__()
+        self.input_dims = input_dims
+        self.chkpt_dir = chkpt_dir
+
+        self.model = torch.nn.Sequential(
+            torch.nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 64, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(64, 64, kernel_size=3, stride=2),
+            torch.nn.ReLU(),
+            torch.nn.Flatten(),
+            torch.nn.Linear(64 * 9 * 9, 256),
+            torch.nn.ReLU(),
+            torch.nn.Linear(256, 1),
+        )
+        self.optimizer = torch.optim.Adam(self.parameters(), alpha, amsgrad=True)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
+
+    def forward(self, x):
+        return self.model(x)
+
+    def save_checkpoint(self):
+        torch.save(self.state_dict(), self.chkpt_dir)
+
+    def load_checkpoint(self):
+        self.load_state_dict(torch.load(self.chkpt_dir))

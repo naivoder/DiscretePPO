@@ -4,10 +4,11 @@ import imageio
 import cv2
 
 
-def preprocess_frame(state):
-    grayscale = cv2.cvtColor(state, cv2.COLOR_BGR2GRAY)
-    resized = cv2.resize(grayscale, (84, 84), interpolation=cv2.INTER_AREA)
-    return np.expand_dims(resized, axis=2)
+def preprocess_frame(frame):
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+    frame = cv2.resize(frame, (84, 84))
+    frame = frame.astype(np.float32) / 255.0
+    return frame
 
 
 def save_animation(frames, filename):

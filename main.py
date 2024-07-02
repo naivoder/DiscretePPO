@@ -6,20 +6,16 @@ import os
 import warnings
 from argparse import ArgumentParser
 import pandas as pd
-import os
-
-os.makedirs("weights", exist_ok=True)
-os.makedirs("metrics", exist_ok=True)
-os.makedirs("environments", exist_ok=True)
+from collections import deque
 
 warnings.simplefilter("ignore")
 
 environments = [
-    "CartPole-v1",          # gymnasium environments
+    "CartPole-v1",  # gymnasium environments
     "MountainCar-v0",
     "Acrobot-v1",
     "LunarLander-v2",
-    "ALE/Asteroids-v5",     # atari environments
+    "ALE/Asteroids-v5",  # atari environments
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
     "ALE/Centipede-v5",
@@ -36,13 +32,15 @@ environments = [
     "ALE/VideoChess-v5",
 ]
 
+
 def clip_reward(reward):
     if reward < -1:
         return -1
     elif reward > 1:
         return 1
     else:
-        return reward 
+        return reward
+
 
 def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=True):
     env = gym.make(env_name, render_mode="rgb_array")
@@ -50,16 +48,16 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
 
     print(f"\nEnvironment: {env_name}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
-    
+
     preprocess = True if "ALE" in env_name else False
     if preprocess:
-        shape = (84, 84, 1)
+        input_dims = (3, 84, 84)
     else:
-        shape = (env.observation_space.shape)
- 
+        input_dims = env.observation_space.shape
+
     agent = DiscretePPOAgent(
         env_name,
-        shape,
+        input_dims,
         env.action_space.n,
         alpha=3e-4,
         n_epochs=n_epochs,
@@ -77,19 +75,27 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
     for i in range(n_games):
         state, _ = env.reset()
         if preprocess:
-            state = utils.preprocess_frame(np.array(state, dtype=np.float32)).flatten()
+            state = utils.preprocess_frame(state)
+            state_buffer = deque(
+                [state] * 3, maxlen=3
+            )  # Initialize the buffer with the first frame
+            state = np.array(state_buffer)  # Create the initial state
         else:
             state = np.array(state, dtype=np.float32).flatten()
 
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
-            
+
             next_state, reward, term, trunc, _ = env.step(action)
-            reward = clip_reward(reward)
+            # reward = clip_reward(reward)
 
             if preprocess:
-                next_state = utils.preprocess_frame(np.array(next_state, dtype=np.float32)).flatten()
+                next_state = utils.preprocess_frame(next_state)
+                state_buffer.append(next_state)  # Add the new frame to the buffer
+                next_state = np.array(
+                    state_buffer
+                )  # Update the state with the new buffer
             else:
                 next_state = np.array(next_state, dtype=np.float32).flatten()
 
@@ -145,9 +151,10 @@ def save_best_version(env_name, agent, seeds=100):
     for _ in range(seeds):
         env = gym.make(env_name, render_mode="rgb_array")
         state, _ = env.reset()
-        state = np.array(state, dtype=np.float32)
         if preprocess:
-            state = utils.preprocess_frame(np.array(state, dtype=np.float32)).flatten()
+            state = utils.preprocess_frame(state)
+            state_buffer = deque([state] * 3, maxlen=3)
+            state = np.array(state_buffer)
         else:
             state = np.array(state, dtype=np.float32).flatten()
 
@@ -160,9 +167,11 @@ def save_best_version(env_name, agent, seeds=100):
             action, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
             if preprocess:
-                next_state = utils.preprocess_frame(np.array(next_state, dtype=np.float32)).flatten()
+                next_state = utils.preprocess_frame(next_state)
+                state_buffer.append(next_state)
+                next_state = np.array(state_buffer)
             else:
-                next_state = np.array(next_state, dtype=np.float32).flatten() 
+                next_state = np.array(next_state, dtype=np.float32).flatten()
             total_reward += reward
             state = next_state
 

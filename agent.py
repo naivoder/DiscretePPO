@@ -1,5 +1,5 @@
 import torch
-from networks import Actor, Critic
+from networks import Actor, Critic, CNNActor, CNNCritic
 from memory import ReplayBuffer
 
 
@@ -25,12 +25,28 @@ class DiscretePPOAgent:
         self.gae_lambda = gae_lambda
         self.entropy_coefficient = entropy_coefficient
         self.max_grad_norm = max_grad_norm
-        self.actor = Actor(
-            input_dims, n_actions, alpha, chkpt_dir=f"weights/{self.env_name}_actor.pt"
-        )
-        self.critic = Critic(
-            input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
-        )
+
+        if "ALE/" in env_name:
+            self.actor = CNNActor(
+                input_dims,
+                n_actions,
+                alpha,
+                chkpt_dir=f"weights/{self.env_name}_actor.pt",
+            )
+            self.critic = CNNCritic(
+                input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
+            )
+        else:
+            self.actor = Actor(
+                input_dims,
+                n_actions,
+                alpha,
+                chkpt_dir=f"weights/{self.env_name}_actor.pt",
+            )
+            self.critic = Critic(
+                input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
+            )
+
         self.memory = ReplayBuffer(batch_size)
 
     def remember(self, state, state_, action, probs, reward, done):
