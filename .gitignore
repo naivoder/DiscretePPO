@@ -2,6 +2,7 @@
 *.pt
 weights/*
 tovi/
+sample_state.jpg 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
