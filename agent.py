@@ -27,6 +27,7 @@ class DiscretePPOAgent:
         self.max_grad_norm = max_grad_norm
 
         if "ALE/" in env_name:
+            print("Learning from pixels with CNN Policy")
             self.actor = CNNActor(
                 input_dims,
                 n_actions,
@@ -37,6 +38,7 @@ class DiscretePPOAgent:
                 input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
             )
         else:
+            print("Learning from features with MLP Policy")
             self.actor = Actor(
                 input_dims,
                 n_actions,
