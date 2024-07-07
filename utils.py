@@ -4,6 +4,20 @@ import imageio
 import cv2
 
 
+def clip_reward(reward):
+    if reward < -1:
+        return -1
+    elif reward > 1:
+        return 1
+    else:
+        return reward
+
+
+# https://github.com/XinJingHao/PPO-Continuous-Pytorch
+def action_adapter(a, max_a):
+    return 2 * (a - 0.5) * max_a
+
+
 def preprocess_frame(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
     frame = cv2.resize(frame, (84, 84))
