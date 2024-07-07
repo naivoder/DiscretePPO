@@ -7,6 +7,7 @@ import warnings
 from argparse import ArgumentParser
 import pandas as pd
 from collections import deque
+from preprocess import AtariEnv
 
 warnings.simplefilter("ignore")
 
@@ -33,79 +34,60 @@ environments = [
 ]
 
 
-def clip_reward(reward):
-    if reward < -1:
-        return -1
-    elif reward > 1:
-        return 1
+def run_ppo(args):
+    if "ALE" in args.env_name:
+        FROM_PIXELS = True
+        env = AtariEnv(
+            args.env_name,
+            shape=(84, 84),
+            repeat=4,
+            clip_rewards=True,
+        ).make()
     else:
-        return reward
+        FROM_PIXELS = False
+        env = gym.make(args.env_name, render_mode="rgb_array")
+    save_prefix = args.env_name.split("/")[-1]
 
-
-def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=True):
-    env = gym.make(env_name, render_mode="rgb_array")
-    save_prefix = env_name.split("/")[-1]
-
-    print(f"\nEnvironment: {env_name}")
+    print(f"\nEnvironment: {save_prefix}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
 
-    preprocess = True if "ALE" in env_name else False
-    if preprocess:
-        input_dims = (3, 84, 84)
-    else:
-        input_dims = env.observation_space.shape
-
     agent = DiscretePPOAgent(
-        env_name,
-        input_dims,
+        save_prefix,
+        env.observation_space.shape,
         env.action_space.n,
         alpha=3e-4,
-        n_epochs=n_epochs,
-        batch_size=batch_size,
+        n_epochs=args.n_epochs,
+        batch_size=args.batch_size,
     )
 
-    # continue training from saved checkpoint
-    if continue_training:
+    if args.continue_training:
         if os.path.exists(f"weights/{save_prefix}_actor.pt"):
             agent.load_checkpoints()
 
     n_steps, n_learn, best_score = 0, 0, float("-inf")
     history, metrics = [], []
 
-    for i in range(n_games):
+    for i in range(args.n_games):
         state, _ = env.reset()
 
-        if preprocess:
-            if i == 0:  # only do this for an atari env
-                utils.save_sample_state(state)
-            state = utils.preprocess_frame(state)
-            state_buffer = deque(
-                [state] * 3, maxlen=3
-            )  # Initialize the buffer with the first frame
-            state = np.array(state_buffer)  # Create the initial state
-        else:
+        if not FROM_PIXELS:
             state = np.array(state, dtype=np.float32).flatten()
 
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
+            scaled_act = utils.action_adapter(action, env.action_space.high[0])
 
-            next_state, reward, term, trunc, _ = env.step(action)
-            reward = clip_reward(reward)
+            next_state, reward, term, trunc, _ = env.step(scaled_act)
+            reward = utils.clip_reward(reward)
 
-            if preprocess:
-                next_state = utils.preprocess_frame(next_state)
-                state_buffer.append(next_state)  # Add the new frame to the buffer
-                next_state = np.array(
-                    state_buffer
-                )  # Update the state with the new buffer
-            else:
+            if not FROM_PIXELS:
                 next_state = np.array(next_state, dtype=np.float32).flatten()
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
             n_steps += 1
-            if n_steps > batch_size and n_steps % horizon == 0:
+            if n_steps > args.batch_size and n_steps % args.horizon == 0:
                 agent.learn()
                 n_learn += 1
 
@@ -128,11 +110,11 @@ def run_ppo(env_name, n_games, n_epochs, horizon, batch_size, continue_training=
         )
 
         print(
-            f"[{env_name} Episode {i + 1:04}/{n_games}]  Average Score = {avg_score:.2f}",
+            f"[{save_prefix} Episode {i + 1:04}/{args.n_games}]  Average Score = {avg_score:.2f}",
             end="\r",
         )
 
-    return history, metrics, best_score, agent
+    save_results(args.env_name, history, metrics, agent)
 
 
 def save_results(env_name, history, metrics, agent):
@@ -149,16 +131,27 @@ def save_best_version(env_name, agent, seeds=100):
     best_total_reward = float("-inf")
     best_frames = None
 
-    preprocess = True if "ALE" in env_name else False
+    FROM_PIXELS = True if "ALE" in env_name else False
 
     for _ in range(seeds):
-        env = gym.make(env_name, render_mode="rgb_array")
-        state, _ = env.reset()
-        if preprocess:
-            state = utils.preprocess_frame(state)
-            state_buffer = deque([state] * 3, maxlen=3)
-            state = np.array(state_buffer)
+        if "ALE" in env_name:
+            FROM_PIXELS = True
+            env = AtariEnv(
+                env_name,
+                shape=(84, 84),
+                repeat=4,
+                clip_rewards=True,
+                no_ops=0,
+                fire_first=True,
+            ).make()
         else:
+            FROM_PIXELS = False
+            env = gym.make(env_name, render_mode="rgb_array")
+
+        save_prefix = env_name.split("/")[-1]
+        state, _ = env.reset()
+
+        if not FROM_PIXELS:
             state = np.array(state, dtype=np.float32).flatten()
 
         frames = []
@@ -168,13 +161,13 @@ def save_best_version(env_name, agent, seeds=100):
         while not term and not trunc:
             frames.append(env.render())
             action, _ = agent.choose_action(state)
-            next_state, reward, term, trunc, _ = env.step(action)
-            if preprocess:
-                next_state = utils.preprocess_frame(next_state)
-                state_buffer.append(next_state)
-                next_state = np.array(state_buffer)
-            else:
+            scaled_act = utils.action_adapter(action, env.action_space.high[0])
+            next_state, reward, term, trunc, _ = env.step(scaled_act)
+            reward = utils.clip_reward(reward)
+
+            if not FROM_PIXELS:
                 next_state = np.array(next_state, dtype=np.float32).flatten()
+
             total_reward += reward
             state = next_state
 
@@ -192,7 +185,6 @@ if __name__ == "__main__":
         "-e", "--env", default=None, help="Environment name from Gymnasium"
     )
     parser.add_argument(
-        "-n",
         "--n_games",
         default=50000,
         type=int,
@@ -205,18 +197,22 @@ if __name__ == "__main__":
         help="Number of epochs during learning",
     )
     parser.add_argument(
-        "-s",
-        "--n_steps",
+        "--horizon",
         default=128,
         type=int,
         help="Horizon, number of steps between learning",
     )
     parser.add_argument(
-        "-b",
         "--batch_size",
         default=256,
         type=int,
         help="Batch size for learning",
+    )
+    parser.add_argument(
+        "--continue_training",
+        default=False,
+        type=bool,
+        help="Continue training from saved weights.",
     )
     args = parser.parse_args()
 
@@ -225,13 +221,8 @@ if __name__ == "__main__":
             os.makedirs(fname)
 
     if args.env:
-        history, metrics, best_score, trained_agent = run_ppo(
-            args.env, args.n_games, args.n_epochs, args.n_steps, args.batch_size
-        )
-        save_results(args.env, history, metrics, trained_agent)
+        history, metrics, best_score, trained_agent = run_ppo(args)
     else:
         for env_name in environments:
-            history, metrics, best_score, trained_agent = run_ppo(
-                env_name, args.n_games, args.n_epochs, args.n_steps, args.batch_size
-            )
-            save_results(env_name, history, metrics, trained_agent)
+            args.env = env_name
+            history, metrics, best_score, trained_agent = run_ppo(args)
