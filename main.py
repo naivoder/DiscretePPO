@@ -6,16 +6,15 @@ import os
 import warnings
 from argparse import ArgumentParser
 import pandas as pd
-from collections import deque
 from preprocess import AtariEnv
 
 warnings.simplefilter("ignore")
 
 environments = [
-    # "CartPole-v1",  # gymnasium environments
-    # "MountainCar-v0",
-    # "Acrobot-v1",
-    # "LunarLander-v2",
+    "CartPole-v1",  # gymnasium environments
+    "MountainCar-v0",
+    "Acrobot-v1",
+    "LunarLander-v2",
     "ALE/Asteroids-v5",  # atari environments
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
@@ -50,7 +49,7 @@ def run_ppo(args):
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
 
     agent = DiscretePPOAgent(
-        save_prefix,
+        args.env,
         env.observation_space.shape,
         env.action_space.n,
         alpha=3e-4,
@@ -71,10 +70,7 @@ def run_ppo(args):
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
-            scaled_act = utils.action_adapter(action, env.action_space.high[0])
-
-            next_state, reward, term, trunc, _ = env.step(scaled_act)
-            reward = utils.clip_reward(reward)
+            next_state, reward, term, trunc, _ = env.step(action)
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
@@ -148,10 +144,7 @@ def save_best_version(env_name, agent, seeds=100):
         while not term and not trunc:
             frames.append(env.render())
             action, _ = agent.choose_action(state)
-            scaled_act = utils.action_adapter(action, env.action_space.high[0])
-
-            next_state, reward, term, trunc, _ = env.step(scaled_act)
-            reward = utils.clip_reward(reward)
+            next_state, reward, term, trunc, _ = env.step(action)
 
             total_reward += reward
             state = next_state
