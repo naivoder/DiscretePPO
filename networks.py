@@ -25,19 +25,8 @@ class Actor(torch.nn.Module):
         self.output = torch.nn.Linear(self.h2_size, self.n_actions)
 
         self.optimizer = torch.optim.Adam(self.parameters(), self.alpha, amsgrad=True)
-
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
-
-        self.init_layers()
-
-    def init_layers(self):
-        torch.nn.init.orthogonal_(self.h1_layer.weight, np.sqrt(2))
-        torch.nn.init.constant_(self.h1_layer.bias, 0)
-        torch.nn.init.orthogonal_(self.h2_layer.weight, np.sqrt(2))
-        torch.nn.init.constant_(self.h2_layer.bias, 0)
-        torch.nn.init.orthogonal_(self.output.weight, 0.01)
-        torch.nn.init.constant_(self.output.bias, 0)
 
     def forward(self, x):
         x = torch.nn.functional.tanh(self.h1_layer(x))
@@ -72,19 +61,8 @@ class Critic(torch.nn.Module):
         self.output = torch.nn.Linear(self.h2_size, 1)
 
         self.optimizer = torch.optim.Adam(self.parameters(), self.alpha, amsgrad=True)
-
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
-
-        self.init_layers()
-
-    def init_layers(self):
-        torch.nn.init.orthogonal_(self.h1_layer.weight, np.sqrt(2))
-        torch.nn.init.constant_(self.h1_layer.bias, 0)
-        torch.nn.init.orthogonal_(self.h2_layer.weight, np.sqrt(2))
-        torch.nn.init.constant_(self.h2_layer.bias, 0)
-        torch.nn.init.orthogonal_(self.output.weight, 1.0)
-        torch.nn.init.constant_(self.output.bias, 0)
 
     def forward(self, x):
         x = torch.nn.functional.tanh(self.h1_layer(x))
@@ -117,12 +95,12 @@ class CNNActor(torch.nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
-    def _calculate_fc_input_dim(self, input_shape):
+    def _calculate_fc1_input_dim(self, input_shape):
         dummy_input = torch.zeros(1, *input_shape)
         x = torch.nn.functional.relu(self.conv1(dummy_input))
         x = torch.nn.functional.relu(self.conv2(x))
         x = torch.nn.functional.relu(self.conv3(x))
-        return x.numel()
+        return x.numel()  # count flattened elements
 
     def forward(self, x):
         x = torch.nn.functional.relu(self.conv1(x))
@@ -157,6 +135,13 @@ class CNNCritic(torch.nn.Module):
         self.optimizer = torch.optim.Adam(self.parameters(), alpha, amsgrad=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
+
+    def _calculate_fc1_input_dim(self, input_shape):
+        dummy_input = torch.zeros(1, *input_shape)
+        x = torch.nn.functional.relu(self.conv1(dummy_input))
+        x = torch.nn.functional.relu(self.conv2(x))
+        x = torch.nn.functional.relu(self.conv3(x))
+        return x.numel()  # count flattened elements
 
     def forward(self, x):
         x = torch.nn.functional.relu(self.conv1(x))
