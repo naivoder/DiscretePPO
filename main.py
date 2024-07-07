@@ -12,10 +12,10 @@ from preprocess import AtariEnv
 warnings.simplefilter("ignore")
 
 environments = [
-    "CartPole-v1",  # gymnasium environments
-    "MountainCar-v0",
-    "Acrobot-v1",
-    "LunarLander-v2",
+    # "CartPole-v1",  # gymnasium environments
+    # "MountainCar-v0",
+    # "Acrobot-v1",
+    # "LunarLander-v2",
     "ALE/Asteroids-v5",  # atari environments
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
@@ -35,18 +35,16 @@ environments = [
 
 
 def run_ppo(args):
-    if "ALE" in args.env_name:
-        FROM_PIXELS = True
+    if "ALE" in args.env:
         env = AtariEnv(
-            args.env_name,
+            args.env,
             shape=(84, 84),
             repeat=4,
             clip_rewards=True,
         ).make()
     else:
-        FROM_PIXELS = False
-        env = gym.make(args.env_name, render_mode="rgb_array")
-    save_prefix = args.env_name.split("/")[-1]
+        env = gym.make(args.env, render_mode="rgb_array")
+    save_prefix = args.env.split("/")[-1]
 
     print(f"\nEnvironment: {save_prefix}")
     print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
@@ -70,9 +68,6 @@ def run_ppo(args):
     for i in range(args.n_games):
         state, _ = env.reset()
 
-        if not FROM_PIXELS:
-            state = np.array(state, dtype=np.float32).flatten()
-
         term, trunc, score = False, False, 0
         while not term and not trunc:
             action, prob = agent.choose_action(state)
@@ -80,9 +75,6 @@ def run_ppo(args):
 
             next_state, reward, term, trunc, _ = env.step(scaled_act)
             reward = utils.clip_reward(reward)
-
-            if not FROM_PIXELS:
-                next_state = np.array(next_state, dtype=np.float32).flatten()
 
             agent.remember(state, next_state, action, prob, reward, term or trunc)
 
@@ -114,7 +106,7 @@ def run_ppo(args):
             end="\r",
         )
 
-    save_results(args.env_name, history, metrics, agent)
+    save_results(args.env, history, metrics, agent)
 
 
 def save_results(env_name, history, metrics, agent):
@@ -131,11 +123,10 @@ def save_best_version(env_name, agent, seeds=100):
     best_total_reward = float("-inf")
     best_frames = None
 
-    FROM_PIXELS = True if "ALE" in env_name else False
-
     for _ in range(seeds):
+        # you know, I probably could just reset the environment...
+        # is reinitializing helping anything?
         if "ALE" in env_name:
-            FROM_PIXELS = True
             env = AtariEnv(
                 env_name,
                 shape=(84, 84),
@@ -145,14 +136,10 @@ def save_best_version(env_name, agent, seeds=100):
                 fire_first=True,
             ).make()
         else:
-            FROM_PIXELS = False
             env = gym.make(env_name, render_mode="rgb_array")
 
         save_prefix = env_name.split("/")[-1]
         state, _ = env.reset()
-
-        if not FROM_PIXELS:
-            state = np.array(state, dtype=np.float32).flatten()
 
         frames = []
         total_reward = 0
@@ -162,11 +149,9 @@ def save_best_version(env_name, agent, seeds=100):
             frames.append(env.render())
             action, _ = agent.choose_action(state)
             scaled_act = utils.action_adapter(action, env.action_space.high[0])
+
             next_state, reward, term, trunc, _ = env.step(scaled_act)
             reward = utils.clip_reward(reward)
-
-            if not FROM_PIXELS:
-                next_state = np.array(next_state, dtype=np.float32).flatten()
 
             total_reward += reward
             state = next_state
@@ -186,7 +171,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_games",
-        default=50000,
+        default=10000,
         type=int,
         help="Number of episodes (games) to run during training",
     )
