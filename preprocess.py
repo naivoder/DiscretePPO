@@ -99,8 +99,9 @@ class AtariEnv:
         clip_rewards=False,
         no_ops=0,
         fire_first=False,
+        render_mode="rgb_array",
     ):
-        self.env = gym.make(env)
+        self.env = gym.make(env, render_mode=render_mode)
         self.env = RepeatActionAndMaxFrame(
             self.env, repeat, clip_rewards, no_ops, fire_first
         )
