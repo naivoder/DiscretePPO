@@ -105,24 +105,32 @@ class CNNActor(torch.nn.Module):
         self.n_actions = n_actions
         self.chkpt_dir = chkpt_dir
 
-        self.model = torch.nn.Sequential(
-            torch.nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-            torch.nn.Conv2d(32, 64, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-            torch.nn.Conv2d(64, 64, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-            torch.nn.Flatten(),
-            torch.nn.Linear(64 * 9 * 9, 256),
-            torch.nn.ReLU(),
-            torch.nn.Linear(256, n_actions),
-        )
+        self.conv1 = torch.nn.Conv2d(input_dims[0], 32, kernel_size=8, stride=4)
+        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
+
+        self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
+        self.fc1 = torch.nn.Linear(self.fc1_input_dim, 512)
+        self.out = torch.nn.Linear(512, n_actions)
+
         self.optimizer = torch.optim.Adam(self.parameters(), alpha, amsgrad=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
+    def _calculate_fc_input_dim(self, input_shape):
+        dummy_input = torch.zeros(1, *input_shape)
+        x = torch.nn.functional.relu(self.conv1(dummy_input))
+        x = torch.nn.functional.relu(self.conv2(x))
+        x = torch.nn.functional.relu(self.conv3(x))
+        return x.numel()
+
     def forward(self, x):
-        x = self.model(x)
+        x = torch.nn.functional.relu(self.conv1(x))
+        x = torch.nn.functional.relu(self.conv2(x))
+        x = torch.nn.functional.relu(self.conv3(x))
+        x = x.view(x.size()[0], -1)
+        x = torch.nn.functional.relu(self.fc1(x))
+        x = self.out(x)
         return torch.distributions.Categorical(logits=x)
 
     def save_checkpoint(self):
@@ -138,24 +146,25 @@ class CNNCritic(torch.nn.Module):
         self.input_dims = input_dims
         self.chkpt_dir = chkpt_dir
 
-        self.model = torch.nn.Sequential(
-            torch.nn.Conv2d(input_dims[0], 32, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-            torch.nn.Conv2d(32, 64, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-            torch.nn.Conv2d(64, 64, kernel_size=3, stride=2),
-            torch.nn.ReLU(),
-            torch.nn.Flatten(),
-            torch.nn.Linear(64 * 9 * 9, 256),
-            torch.nn.ReLU(),
-            torch.nn.Linear(256, 1),
-        )
+        self.conv1 = torch.nn.Conv2d(input_dims[0], 32, kernel_size=8, stride=4)
+        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
+
+        self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
+        self.fc1 = torch.nn.Linear(self.fc1_input_dim, 512)
+        self.out = torch.nn.Linear(512, 1)
+
         self.optimizer = torch.optim.Adam(self.parameters(), alpha, amsgrad=True)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
     def forward(self, x):
-        return self.model(x)
+        x = torch.nn.functional.relu(self.conv1(x))
+        x = torch.nn.functional.relu(self.conv2(x))
+        x = torch.nn.functional.relu(self.conv3(x))
+        x = x.view(x.size()[0], -1)
+        x = torch.nn.functional.relu(self.fc1(x))
+        return self.out(x)
 
     def save_checkpoint(self):
         torch.save(self.state_dict(), self.chkpt_dir)
