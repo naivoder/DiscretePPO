@@ -84,11 +84,11 @@ python main.py --env 'LunarLander-v2'
             <p><b>BeamRider-v5</b></p>
             <img src="environments/BeamRider-v5.gif" width="250" height="250"/>
         </td>
-        <!-- <td>
+        <td>
             <p><b>Centipede-v5</b></p>
             <img src="environments/Centipede-v5.gif" width="250" height="250"/>
         </td>
-        <td>
+        <!-- <td>
             <p><b>DonkeyKong-v5</b></p>
             <img src="environments/DonkeyKong-v5.gif" width="250" height="250"/>
         </td> -->
@@ -97,10 +97,10 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/BeamRider-v5_running_avg.png" width="250" height="250"/>
         </td>
-        <!-- <td>
+        <td>
             <img src="metrics/Centipede-v5_running_avg.png" width="250" height="250"/>
         </td>
-        <td>
+        <!-- <td>
             <img src="metrics/DonkeyKong-v5_running_avg.png" width="250" height="250"/>
         </td> -->
     </tr>
