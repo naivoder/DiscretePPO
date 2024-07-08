@@ -11,10 +11,10 @@ from preprocess import AtariEnv
 warnings.simplefilter("ignore")
 
 environments = [
-    "CartPole-v1",  # gymnasium environments
-    "MountainCar-v0",
-    "Acrobot-v1",
-    "LunarLander-v2",
+    # "CartPole-v1",  # gymnasium environments
+    # "MountainCar-v0",
+    # "Acrobot-v1",
+    # "LunarLander-v2",
     "ALE/Asteroids-v5",  # atari environments
     "ALE/Breakout-v5",
     "ALE/BeamRider-v5",
@@ -129,7 +129,7 @@ def save_best_version(env_name, agent, seeds=100):
                 repeat=4,
                 clip_rewards=True,
                 no_ops=0,
-                fire_first=True,
+                fire_first=False,
             ).make()
         else:
             env = gym.make(env_name, render_mode="rgb_array")
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_games",
-        default=10000,
+        default=20000,
         type=int,
         help="Number of episodes (games) to run during training",
     )
@@ -199,8 +199,8 @@ if __name__ == "__main__":
             os.makedirs(fname)
 
     if args.env:
-        history, metrics, best_score, trained_agent = run_ppo(args)
+        run_ppo(args)
     else:
         for env_name in environments:
             args.env = env_name
-            history, metrics, best_score, trained_agent = run_ppo(args)
+            run_ppo(args)
