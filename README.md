@@ -38,10 +38,6 @@ python main.py --env 'LunarLander-v2'
             <p><b>Acrobot-v1</b></p>
             <img src="environments/Acrobot-v1.gif" width="250" height="250"/>
         </td>
-        <td>
-            <p><b>LunarLander-v2</b></p>
-            <img src="environments/LunarLander-v2.gif" width="250" height="250"/>
-        </td>
     </tr>
     <tr>
         <td>
@@ -53,16 +49,13 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/Acrobot-v1_running_avg.png" width="250" height="250"/>
         </td>
-        <td>
-            <img src="metrics/LunarLander-v2_running_avg.png" width="250" height="250"/>
-        </td>
     </tr>
 </table>
-<!-- <table>
+<table>
     <tr>
         <td>
-            <p><b>LundarLander-v2</b></p>
-            <img src="environments/LundarLander-v2.gif" width="250" height="250"/>
+            <p><b>LunarLander-v2</b></p>
+            <img src="environments/LunarLander-v2.gif" width="250" height="250"/>
         </td>
         <td>
             <p><b>Asteroids-v5</b></p>
@@ -75,7 +68,7 @@ python main.py --env 'LunarLander-v2'
     </tr>
     <tr>
         <td>
-            <img src="metrics/LundarLander-v2_running_avg.png" width="250" height="250"/>
+            <img src="metrics/LunarLander-v2_running_avg.png" width="250" height="250"/>
         </td>
         <td>
             <img src="metrics/Asteroids-v5_running_avg.png" width="250" height="250"/>
@@ -91,28 +84,28 @@ python main.py --env 'LunarLander-v2'
             <p><b>BeamRider-v5</b></p>
             <img src="environments/BeamRider-v5.gif" width="250" height="250"/>
         </td>
-        <td>
+        <!-- <td>
             <p><b>Centipede-v5</b></p>
             <img src="environments/Centipede-v5.gif" width="250" height="250"/>
         </td>
         <td>
             <p><b>DonkeyKong-v5</b></p>
             <img src="environments/DonkeyKong-v5.gif" width="250" height="250"/>
-        </td>
+        </td> -->
     </tr>
     <tr>
         <td>
             <img src="metrics/BeamRider-v5_running_avg.png" width="250" height="250"/>
         </td>
-        <td>
+        <!-- <td>
             <img src="metrics/Centipede-v5_running_avg.png" width="250" height="250"/>
         </td>
         <td>
             <img src="metrics/DonkeyKong-v5_running_avg.png" width="250" height="250"/>
-        </td>
+        </td> -->
     </tr>
 </table>
-<table>
+<!-- <table>
     <tr>
         <td>
             <p><b>Frogger-v5</b></p>
@@ -165,7 +158,7 @@ python main.py --env 'LunarLander-v2'
             <img src="metrics/Tetris-v5_running_avg.png" width="250" height="250"/>
         </td>
     </tr>
-</table> -->
+</table>  -->
 
 It's very interesting that PPO struggles to solve the MountainCar environment (solved easily by DDPG). I found this comment from `/u/jurniss` on Reddit very insightful:
 
