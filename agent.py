@@ -26,7 +26,7 @@ class DiscretePPOAgent:
         self.entropy_coefficient = entropy_coefficient
         self.max_grad_norm = max_grad_norm
 
-        if "ALE/" in env_name:
+        if "ALE/" in env_name or "NoFrameskip" in env_name:
             print("Learning from pixels with CNN Policy")
             self.actor = CNNActor(
                 input_dims,

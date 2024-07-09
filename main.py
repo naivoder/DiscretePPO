@@ -15,26 +15,41 @@ environments = [
     # "MountainCar-v0",
     # "Acrobot-v1",
     # "LunarLander-v2",
-    "ALE/Asteroids-v5",  # atari environments
-    "ALE/Breakout-v5",
-    "ALE/BeamRider-v5",
-    "ALE/Centipede-v5",
-    "ALE/DonkeyKong-v5",
-    "ALE/DoubleDunk-v5",
-    "ALE/Frogger-v5",
-    "ALE/KungFuMaster-v5",
-    "ALE/MarioBros-v5",
-    "ALE/MsPacman-v5",
-    "ALE/Pong-v4",
-    "ALE/Seaquest-v5",
-    "ALE/SpaceInvaders-v5",
-    "ALE/Tetris-v5",
-    "ALE/VideoChess-v5",
+    # "ALE/Asteroids-v5",  # atari environments
+    # "ALE/Breakout-v5",
+    # "ALE/BeamRider-v5",
+    # "ALE/Centipede-v5",
+    # "ALE/DonkeyKong-v5",
+    # "ALE/DoubleDunk-v5",
+    # "ALE/Frogger-v5",
+    # "ALE/KungFuMaster-v5",
+    # "ALE/MarioBros-v5",
+    # "ALE/MsPacman-v5",
+    # "ALE/Pong-v4",
+    # "ALE/Seaquest-v5",
+    # "ALE/SpaceInvaders-v5",
+    # "ALE/Tetris-v5",
+    # "ALE/VideoChess-v5",
+    "AsteroidsNoFrameskip-v4",
+    "BreakoutNoFrameskip-v4",
+    "BeamRiderNoFrameskip-v4",
+    "CentipedeNoFrameskip-v4",
+    "DonkeyKongNoFrameskip-v4",
+    "DoubleDunkNoFrameskip-v4",
+    "FroggerNoFrameskip-v4",
+    "KungFuMasterNoFrameskip-v4",
+    "MarioBrosNoFrameskip-v4",
+    "MsPacmanNoFrameskip-v4",
+    "PongNoFrameskip-v4",
+    "SeaquestNoFrameskip-v4",
+    "SpaceInvadersNoFrameskip-v4",
+    "TetrisNoFrameskip-v4",
+    "VideoChessNoFrameskip-v4",
 ]
 
 
 def run_ppo(args):
-    if "ALE" in args.env:
+    if "ALE" in args.env or "NoFrameskip" in args.env:
         env = AtariEnv(
             args.env,
             shape=(84, 84),
@@ -52,7 +67,7 @@ def run_ppo(args):
         args.env,
         env.observation_space.shape,
         env.action_space.n,
-        alpha=3e-5,
+        alpha=1e-4,
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
     )
@@ -122,7 +137,7 @@ def save_best_version(env_name, agent, seeds=100):
     for _ in range(seeds):
         # you know, I probably could just reset the environment...
         # is reinitializing helping anything?
-        if "ALE" in env_name:
+        if "ALE" in env_name or "NoFrameskip" in args.env:
             env = AtariEnv(
                 env_name,
                 shape=(84, 84),
@@ -164,19 +179,19 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_games",
-        default=20000,
+        default=50000,
         type=int,
         help="Number of episodes (games) to run during training",
     )
     parser.add_argument(
         "--n_epochs",
-        default=3,
+        default=5,
         type=int,
         help="Number of epochs during learning",
     )
     parser.add_argument(
         "--horizon",
-        default=128,
+        default=2048,
         type=int,
         help="Horizon, number of steps between learning",
     )
