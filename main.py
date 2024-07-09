@@ -179,19 +179,19 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_games",
-        default=50000,
+        default=10000,
         type=int,
         help="Number of episodes (games) to run during training",
     )
     parser.add_argument(
         "--n_epochs",
-        default=5,
+        default=3,
         type=int,
         help="Number of epochs during learning",
     )
     parser.add_argument(
         "--horizon",
-        default=2048,
+        default=1024,
         type=int,
         help="Horizon, number of steps between learning",
     )
