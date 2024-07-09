@@ -117,11 +117,11 @@ python main.py --env 'LunarLander-v2'
             <p><b>Frogger-v5</b></p>
             <img src="environments/Frogger-v5.gif" width="250" height="250"/>
         </td>
-        <!-- <td>
+        <td>
             <p><b>KungFuMaster-v5</b></p>
             <img src="environments/KungFuMaster-v5.gif" width="250" height="250"/>
         </td>
-        <td>
+        <!-- <td>
             <p><b>MarioBros-v5</b></p>
             <img src="environments/MarioBros-v5.gif" width="250" height="250"/>
         </td>-->
@@ -133,10 +133,10 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/Frogger-v5_running_avg.png" width="250" height="250"/>
         </td>
-        <!-- <td>
+        <td>
             <img src="metrics/KungFuMaster-v5_running_avg.png" width="250" height="250"/>
         </td>
-        <td>
+        <!--<td>
             <img src="metrics/MarioBros-v5_running_avg.png" width="250" height="250"/>
         </td>-->
     </tr>
