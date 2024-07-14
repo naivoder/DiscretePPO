@@ -7,30 +7,9 @@ import warnings
 from argparse import ArgumentParser
 import pandas as pd
 from preprocess import AtariEnv
+from config import environments
 
 warnings.simplefilter("ignore")
-
-environments = [
-    # "CartPole-v1",  # gymnasium environments
-    # "MountainCar-v0",
-    # "Acrobot-v1",
-    # "LunarLander-v2",
-    "AsteroidsNoFrameskip-v4",  # atari environments
-    "BreakoutNoFrameskip-v4",
-    "BeamRiderNoFrameskip-v4",
-    "CentipedeNoFrameskip-v4",
-    "DonkeyKongNoFrameskip-v4",
-    "DoubleDunkNoFrameskip-v4",
-    "FroggerNoFrameskip-v4",
-    "KungFuMasterNoFrameskip-v4",
-    "MarioBrosNoFrameskip-v4",
-    "MsPacmanNoFrameskip-v4",
-    "PongNoFrameskip-v4",
-    "SeaquestNoFrameskip-v4",
-    "SpaceInvadersNoFrameskip-v4",
-    "TetrisNoFrameskip-v4",
-    "VideoChessNoFrameskip-v4",
-]
 
 
 def run_ppo(args):
