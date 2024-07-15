@@ -8,21 +8,20 @@ spec:
   params:
     - env:
         [
-          "ALE/Asteroids-v5",
-          "ALE/Breakout-v5",
-          "ALE/BeamRider-v5",
-          "ALE/Centipede-v5",
-          "ALE/DonkeyKong-v5",
-          "ALE/DoubleDunk-v5",
-          "ALE/Frogger-v5",
-          "ALE/KungFuMaster-v5",
-          "ALE/MarioBros-v5",
-          "ALE/MsPacman-v5",
-          "ALE/Pong-v5",
-          "ALE/Seaquest-v5",
-          "ALE/SpaceInvaders-v5",
-          "ALE/Tetris-v5",
-          "ALE/VideoChess-v5",
+          "MsPacmanNoFrameskip-v4",
+          "NameThisGameNoFrameskip-v4",
+          "PhoenixNoFrameskip-v4",
+          "PitfallNoFrameskip-v4",
+          "PongNoFrameskip-v4",
+          "PooyanNoFrameskip-v4",
+          "PrivateEyeNoFrameskip-v4",
+          "QbertNoFrameskip-v4",
+          "RiverraidNoFrameskip-v4",
+          "RoadRunnerNoFrameskip-v4",
+          "RobotTankNoFrameskip-v4",
+          "SeaquestNoFrameskip-v4",
+          "SkiingNoFrameskip-v4",
+          "SolarisNoFrameskip-v4",
         ]
 
   entrypoint: "python {{path}}/main.py --env {{env.value}}"
