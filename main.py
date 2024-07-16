@@ -31,7 +31,7 @@ def run_ppo(args):
         args.env,
         env.observation_space.shape,
         env.action_space.n,
-        alpha=1e-4,
+        alpha=3e-5,
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
     )
@@ -108,7 +108,7 @@ def save_best_version(env_name, agent, seeds=100):
                 repeat=4,
                 clip_rewards=True,
                 no_ops=0,
-                fire_first=False,
+                fire_first=True,
             ).make()
         else:
             env = gym.make(env_name, render_mode="rgb_array")
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--horizon",
-        default=1024,
+        default=128,
         type=int,
         help="Horizon, number of steps between learning",
     )
