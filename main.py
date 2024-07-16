@@ -61,6 +61,9 @@ def run_ppo(args):
             score += reward
             state = next_state
 
+        agent.actor_scheduler.step()
+        agent.critic_scheduler.step()
+
         history.append(score)
         avg_score = np.mean(history[-100:])
 
@@ -143,25 +146,25 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_games",
-        default=10000,
+        default=50000,
         type=int,
         help="Number of episodes (games) to run during training",
     )
     parser.add_argument(
         "--n_epochs",
-        default=3,
+        default=10,
         type=int,
         help="Number of epochs during learning",
     )
     parser.add_argument(
         "--horizon",
-        default=128,
+        default=2048,
         type=int,
         help="Horizon, number of steps between learning",
     )
     parser.add_argument(
         "--batch_size",
-        default=256,
+        default=64,
         type=int,
         help="Batch size for learning",
     )

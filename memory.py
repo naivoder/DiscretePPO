@@ -9,12 +9,12 @@ class ReplayBuffer:
         self.actions = []
         self.rewards = []
         self.dones = []
-        self.new_states = []
+        self.values = []
 
     def sample(self):
         return (
             np.array(self.states),
-            np.array(self.new_states),
+            np.array(self.values),
             np.array(self.actions),
             np.array(self.probs),
             np.array(self.rewards),
@@ -32,13 +32,13 @@ class ReplayBuffer:
         ]
         return batches
 
-    def store_transition(self, state, state_, action, probs, reward, done):
+    def store_transition(self, state, value, action, probs, reward, done):
         self.states.append(state)
         self.actions.append(action)
         self.probs.append(probs)
         self.rewards.append(reward)
         self.dones.append(done)
-        self.new_states.append(state_)
+        self.values.append(value)
 
     def clear_memory(self):
         self.states = []
@@ -46,4 +46,4 @@ class ReplayBuffer:
         self.actions = []
         self.rewards = []
         self.dones = []
-        self.new_states = []
+        self.values = []
