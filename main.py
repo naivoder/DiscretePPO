@@ -31,7 +31,6 @@ def run_ppo(args):
         args.env,
         env.observation_space.shape,
         env.action_space.n,
-        alpha=3e-5,
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
     )
@@ -48,10 +47,10 @@ def run_ppo(args):
 
         term, trunc, score = False, False, 0
         while not term and not trunc:
-            action, prob = agent.choose_action(state)
+            action, prob, value = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
 
-            agent.remember(state, next_state, action, prob, reward, term or trunc)
+            agent.remember(state, value, action, prob, reward, term or trunc)
 
             n_steps += 1
             if n_steps > args.batch_size and n_steps % args.horizon == 0:
@@ -152,13 +151,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_epochs",
-        default=10,
+        default=5,
         type=int,
         help="Number of epochs during learning",
     )
     parser.add_argument(
         "--horizon",
-        default=2048,
+        default=5000,
         type=int,
         help="Horizon, number of steps between learning",
     )

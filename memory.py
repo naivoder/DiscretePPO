@@ -5,11 +5,11 @@ class ReplayBuffer:
     def __init__(self, batch_size):
         self.batch_size = batch_size
         self.states = []
+        self.values = []
         self.probs = []
         self.actions = []
         self.rewards = []
         self.dones = []
-        self.values = []
 
     def sample(self):
         return (
@@ -34,11 +34,11 @@ class ReplayBuffer:
 
     def store_transition(self, state, value, action, probs, reward, done):
         self.states.append(state)
+        self.values.append(value)
         self.actions.append(action)
         self.probs.append(probs)
         self.rewards.append(reward)
         self.dones.append(done)
-        self.values.append(value)
 
     def clear_memory(self):
         self.states = []

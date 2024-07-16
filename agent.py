@@ -2,6 +2,8 @@ import torch
 from networks import Actor, Critic, CNNActor, CNNCritic
 from memory import ReplayBuffer
 from torch.optim.lr_scheduler import LambdaLR
+import numpy as np
+
 
 def lr_lambda(epoch):
     if epoch < 5000:
@@ -14,7 +16,8 @@ def lr_lambda(epoch):
         return 3e-5
     elif epoch < 40000:
         return 1e-5
-    
+
+
 class DiscretePPOAgent:
     def __init__(
         self,
@@ -61,9 +64,9 @@ class DiscretePPOAgent:
                 input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
             )
 
-        self.actor_scheduler = LambdaLR(self.actor.optimizer,lr_lambda)
-        self.critic_scheduler = LambdaLR(self.critic.optimizer,lr_lambda)
-        
+        self.actor_scheduler = LambdaLR(self.actor.optimizer, lr_lambda)
+        self.critic_scheduler = LambdaLR(self.critic.optimizer, lr_lambda)
+
         self.memory = ReplayBuffer(batch_size)
 
     def remember(self, state, state_, action, probs, reward, done):
@@ -87,14 +90,11 @@ class DiscretePPOAgent:
             value = self.critic(state)
 
         return (
-            # action.cpu().numpy().flatten().item(),
-            # probs.cpu().numpy().flatten().item(),
-            # value.cpu().numpy().flatten().item()
-            action.detach(),
-            prob.detach(),
-            value.detach()
+            action.cpu().numpy().flatten().item(),
+            prob.cpu().numpy().flatten().item(),
+            value.cpu().numpy().flatten().item(),
         )
-    
+
     def evaluate_surrogate(self, state, action):
         dist = self.actor(state)
         prob = dist.log_prob(action)
@@ -114,16 +114,21 @@ class DiscretePPOAgent:
                 discounted_return = 0
             discounted_return = reward + (self.gamma * discounted_return)
             returns.insert(0, discounted_return)
+        returns = torch.FloatTensor(np.array(returns)).to(self.critic.device)
 
         state_arr = torch.FloatTensor(state_arr).to(self.critic.device)
         action_arr = torch.FloatTensor(action_arr).to(self.critic.device)
         prob_arr = torch.FloatTensor(prob_arr).to(self.critic.device)
         value_arr = torch.FloatTensor(value_arr).to(self.critic.device)
         dones_arr = torch.BoolTensor(dones_arr).to(self.critic.device)
-        reward_arr = torch.FloatTensor(reward_arr).unsqueeze(1).to(self.critic.device)
+        reward_arr = torch.FloatTensor(reward_arr).to(self.critic.device)
 
         advantages_arr = reward_arr - value_arr
-        
+        # print("")
+        # print("rewards:", reward_arr.shape)
+        # print("values:", value_arr.shape)
+        # print("advantages:", advantages_arr.shape)
+
         for _ in range(self.n_epochs):
             batches = self.memory.generate_batches()
             for batch in batches:
@@ -134,6 +139,10 @@ class DiscretePPOAgent:
                 new_probs, values, entropy = self.evaluate_surrogate(states, actions)
 
                 prob_ratio = torch.exp(new_probs - old_probs)
+                # print("old_probs:", old_probs.shape)
+                # print("new_probs:", new_probs.shape)
+                # print("prov_ratio:", prob_ratio.shape)
+                # print("advantages:", advantages.shape)
 
                 # surrogate loss
                 weighted_probs = advantages * prob_ratio
@@ -142,17 +151,16 @@ class DiscretePPOAgent:
                     * advantages
                 )
 
-                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs).mean()
-                actor_loss -= self.entropy_coefficient * entropy
+                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs)
+                # print("actor_loss:", actor_loss.shape)
+                # print("entropy:", entropy.shape)
+                actor_loss -= self.entropy_coefficient * entropy.squeeze()
 
                 self.actor.optimizer.zero_grad()
-                actor_loss.backward()
-                self.actor.optimizer.step()
-
-                critic_loss = (values - returns[batch]).pow(2).mean()
-
                 self.critic.optimizer.zero_grad()
-                critic_loss.backward()
+                loss = actor_loss.mean() + 0.5 * (values - returns[batch]).pow(2).mean()
+                loss.backward()
+                self.actor.optimizer.step()
                 self.critic.optimizer.step()
 
         self.memory.clear_memory()
