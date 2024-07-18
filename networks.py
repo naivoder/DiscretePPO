@@ -77,7 +77,7 @@ class Critic(torch.nn.Module):
 
 
 class CNNActor(torch.nn.Module):
-    def __init__(self, input_dims, n_actions, alpha=3e-4, chkpt_dir="weights/actor.pt"):
+    def __init__(self, input_dims, n_actions, alpha=1e-4, chkpt_dir="weights/actor.pt"):
         super(CNNActor, self).__init__()
         self.input_dims = input_dims
         self.n_actions = n_actions
@@ -119,7 +119,7 @@ class CNNActor(torch.nn.Module):
 
 
 class CNNCritic(torch.nn.Module):
-    def __init__(self, input_dims, alpha=3e-4, chkpt_dir="weights/critic.pt"):
+    def __init__(self, input_dims, alpha=1e-4, chkpt_dir="weights/critic.pt"):
         super(CNNCritic, self).__init__()
         self.input_dims = input_dims
         self.chkpt_dir = chkpt_dir

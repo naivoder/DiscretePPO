@@ -1,21 +1,8 @@
 import torch
 from networks import Actor, Critic, CNNActor, CNNCritic
 from memory import ReplayBuffer
-from torch.optim.lr_scheduler import LambdaLR
 import numpy as np
 
-
-def lr_lambda(epoch):
-    if epoch < 5000:
-        return 1e-3
-    elif epoch < 10000:
-        return 3e-4
-    elif epoch < 20000:
-        return 1e-4
-    elif epoch < 30000:
-        return 3e-5
-    elif epoch < 40000:
-        return 1e-5
 
 
 class DiscretePPOAgent:
@@ -25,7 +12,7 @@ class DiscretePPOAgent:
         input_dims,
         n_actions,
         gamma=0.99,
-        alpha=3e-4,
+        alpha=1e-4,
         gae_lambda=0.95,
         policy_clip=0.1,
         batch_size=64,
@@ -50,7 +37,7 @@ class DiscretePPOAgent:
                 chkpt_dir=f"weights/{self.env_name}_actor.pt",
             )
             self.critic = CNNCritic(
-                input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
+                input_dims, 1e-3, chkpt_dir=f"weights/{self.env_name}_critic.pt"
             )
         else:
             print("Learning from features with MLP Policy")
@@ -63,9 +50,6 @@ class DiscretePPOAgent:
             self.critic = Critic(
                 input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
             )
-
-        self.actor_scheduler = LambdaLR(self.actor.optimizer, lr_lambda)
-        self.critic_scheduler = LambdaLR(self.critic.optimizer, lr_lambda)
 
         self.memory = ReplayBuffer(batch_size)
 
