@@ -107,7 +107,7 @@ def save_best_version(env_name, agent, seeds=100):
                 repeat=4,
                 clip_rewards=True,
                 no_ops=0,
-                fire_first=True,
+                fire_first=False,
             ).make()
         else:
             env = gym.make(env_name, render_mode="rgb_array")
@@ -121,7 +121,7 @@ def save_best_version(env_name, agent, seeds=100):
         term, trunc = False, False
         while not term and not trunc:
             frames.append(env.render())
-            action, _ = agent.choose_action(state)
+            action, prob, value = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
 
             total_reward += reward
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_games",
-        default=50000,
+        default=20000,
         type=int,
         help="Number of episodes (games) to run during training",
     )

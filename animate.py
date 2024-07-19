@@ -1,18 +1,23 @@
-import gymnasium as gym
+from preprocess import AtariEnv
 import torch
-from agent import SACAgent
+from agent import DiscretePPOAgent
 from argparse import ArgumentParser
 from utils import save_animation
 
 def generate_animation(env_name):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    env = gym.make(env_name, render_mode="rgb_array")
-    agent = SACAgent(env_name,
+    env = AtariEnv(
+            env_name,
+            shape=(84, 84),
+            repeat=4,
+            clip_rewards=True,
+            no_ops=0,
+            fire_first=False,
+        ).make()
+    agent = DiscretePPOAgent(
+        env_name,
         env.observation_space.shape,
-        env.action_space,
-        tau=5e-3,
-        reward_scale=10,
-        batch_size=256).to(device)
+        env.action_space.n)
     
     agent.load_checkpoints()
     
@@ -27,7 +32,7 @@ def generate_animation(env_name):
         term, trunc = False, False
         while not term and not trunc:
             frames.append(env.render())
-            action = agent.choose_action(state)
+            action, _, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
             state = next_state
             total_reward += reward
