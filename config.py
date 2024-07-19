@@ -1,6 +1,6 @@
 environments = [
     # "AdventureNoFrameskip-v4",
-    "AirRaidNoFrameskip-v4",
+    # "AirRaidNoFrameskip-v4",
     "AlienNoFrameskip-v4",
     "AmidarNoFrameskip-v4",
     "AssaultNoFrameskip-v4",

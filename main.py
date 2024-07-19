@@ -154,7 +154,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--horizon",
-        default=10000,
+        default=5000,
         type=int,
         help="Horizon, number of steps between learning",
     )
