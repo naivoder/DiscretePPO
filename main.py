@@ -148,19 +148,19 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_epochs",
-        default=3,
+        default=5,
         type=int,
         help="Number of epochs during learning",
     )
     parser.add_argument(
         "--horizon",
-        default=5000,
+        default=2048,
         type=int,
         help="Horizon, number of steps between learning",
     )
     parser.add_argument(
         "--batch_size",
-        default=256,
+        default=64,
         type=int,
         help="Batch size for learning",
     )
