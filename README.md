@@ -4,7 +4,8 @@
 
 🚧 🛠️👷‍♀️ 🛑 Under construction...
 
-I realized I'm not using the "NoFrameSkip" environments, that could partially explain poor learning? I still suspect some mistake on my part.
+Poor learning on lots of environments even when using the NoFrameskip envs...  
+Reading lots of commentary on how the authors used a bunch of tricks they didn't include in the paper. I might have to do some fancier stuff to ensure the models learn effectively 🧐
 
 ## Setup
 
@@ -118,8 +119,8 @@ python main.py --env 'LunarLander-v2'
             <img src="environments/AtlantisNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
         <td>
-            <p><b>KungFuMaster-v5</b></p>
-            <img src="environments/KungFuMaster-v5.gif" width="250" height="250"/>
+            <p><b>BankHeist</b></p>
+            <img src="environments/BankHeistNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
     </tr>
     <tr>
@@ -130,7 +131,7 @@ python main.py --env 'LunarLander-v2'
             <img src="metrics/AtlantisNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>
         <td>
-            <img src="metrics/KungFuMaster-v5_running_avg.png" width="250" height="250"/>
+            <img src="metrics/BankHeistNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>
     </tr>
 </table>
