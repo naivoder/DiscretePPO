@@ -83,17 +83,23 @@ class CNNActor(torch.nn.Module):
         self.n_actions = n_actions
         self.chkpt_dir = chkpt_dir
 
-        self.conv1 = torch.nn.Conv2d(input_dims[0], 32, kernel_size=8, stride=4)
-        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
-        self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.conv1 = self._init_weights(torch.nn.Conv2d(input_dims[0], 32, kernel_size=8, stride=4))
+        self.conv2 = self._init_weights(torch.nn.Conv2d(32, 64, kernel_size=4, stride=2))
+        self.conv3 = self._init_weights(torch.nn.Conv2d(64, 64, kernel_size=3, stride=1))
 
         self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
-        self.fc1 = torch.nn.Linear(self.fc1_input_dim, 512)
-        self.out = torch.nn.Linear(512, n_actions)
+        self.fc1 = self._init_weights(torch.nn.Linear(self.fc1_input_dim, 512))
+        self.out = self._init_weights(torch.nn.Linear(512, n_actions), std=0.01)
 
-        self.optimizer = torch.optim.Adam(self.parameters(), alpha, amsgrad=True)
+        self.optimizer = torch.optim.AdamW(self.parameters(), alpha)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
+
+    def _init_weights(sefl, layer, std=np.sqrt(2), bias=0.0):
+        """taken from cleanrl implementation"""
+        torch.nn.init.orthogonal_(layer.weight, std)
+        torch.nn.init.constant_(layer.bias, bias)
+        return layer
 
     def _calculate_fc1_input_dim(self, input_shape):
         dummy_input = torch.zeros(1, *input_shape)
@@ -124,17 +130,23 @@ class CNNCritic(torch.nn.Module):
         self.input_dims = input_dims
         self.chkpt_dir = chkpt_dir
 
-        self.conv1 = torch.nn.Conv2d(input_dims[0], 32, kernel_size=8, stride=4)
-        self.conv2 = torch.nn.Conv2d(32, 64, kernel_size=4, stride=2)
-        self.conv3 = torch.nn.Conv2d(64, 64, kernel_size=3, stride=1)
+        self.conv1 = self._init_weights(torch.nn.Conv2d(input_dims[0], 32, kernel_size=8, stride=4))
+        self.conv2 = self._init_weights(torch.nn.Conv2d(32, 64, kernel_size=4, stride=2))
+        self.conv3 = self._init_weights(torch.nn.Conv2d(64, 64, kernel_size=3, stride=1))
 
         self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
-        self.fc1 = torch.nn.Linear(self.fc1_input_dim, 512)
-        self.out = torch.nn.Linear(512, 1)
+        self.fc1 = self._init_weights(torch.nn.Linear(self.fc1_input_dim, 512))
+        self.out = self._init_weights(torch.nn.Linear(512, 1), std=1)
 
-        self.optimizer = torch.optim.Adam(self.parameters(), alpha, amsgrad=True)
+        self.optimizer = torch.optim.AdamW(self.parameters(), alpha)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
+
+    def _init_weights(sefl, layer, std=np.sqrt(2), bias=0.0):
+        """taken from cleanrl implementation"""
+        torch.nn.init.orthogonal_(layer.weight, std)
+        torch.nn.init.constant_(layer.bias, bias)
+        return layer
 
     def _calculate_fc1_input_dim(self, input_shape):
         dummy_input = torch.zeros(1, *input_shape)
