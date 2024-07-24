@@ -14,6 +14,32 @@ import torch
 warnings.simplefilter("ignore")
 ALEInterface.setLoggerMode(LoggerMode.Error)
 
+def collect_fixed_states(env_name, n_envs=50, max_steps=10):
+    def make_env():
+        return AtariEnv(
+            env_name,
+            shape=(84, 84),
+            repeat=4,
+            clip_rewards=True,
+        ).make()
+
+    envs = gym.vector.AsyncVectorEnv([make_env for _ in range(n_envs)])
+    
+    fixed_states = np.zeros((n_envs * 2, 4, 84, 84), np.float32)
+    for _ in range(2):
+        states, _ = envs.reset()
+
+        steps = np.random.randint(1, max_steps)
+        for _ in range(steps):
+            actions = [envs.single_action_space.sample() for _ in range(n_envs)]
+            states, _, term, trunc, _ = envs.step(actions)
+            if term.any() or trunc.any():
+                break
+
+        fixed_states.extend(states)
+
+    return torch.FloatTensor(fixed_states)
+
 def run_ppo(args):
     def make_env():
         return AtariEnv(
@@ -37,6 +63,8 @@ def run_ppo(args):
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
     )
+
+    fixed_states = collect_fixed_states(args.env, n_envs=50).to(agent.actor.device)
 
     if args.continue_training:
         if os.path.exists(f"weights/{save_prefix}_actor.pt"):
@@ -80,18 +108,22 @@ def run_ppo(args):
             best_score = avg_score
             agent.save_checkpoints()
 
+        avg_val = np.mean([agent.critic(s) for s in fixed_states])
+
         metrics.append(
             {
                 "episode": episode,
                 "average_score": avg_score,
                 "best_score": best_score,
+                "average_critic_value": avg_val
             }
         )
 
-        ep_str = f"[Episode {n_steps:6}]"
-        g_str = f"\tCompleted Games = {len(history):5}/{args.n_games}"
-        avg_str = f"\tAverage Score = {avg_score:.2f}"
-        print(ep_str + g_str + avg_str, end="\r")
+        ep_str = f"[Episode {n_steps:09}]"
+        g_str = f"\tGames = {len(history):05}/{args.n_games}"
+        avg_str = f"\tAvg. Score = {avg_score:.2f}"
+        crit_str = f"\tAvg. Critic Value = {avg_val:.2f}"
+        print(ep_str + g_str + avg_str + crit_str, end="\r")
 
     torch.save(agent.actor.state_dict(), f"weights/{save_prefix}_actor_final.pt")
     torch.save(agent.critic.state_dict(), f"weights/{save_prefix}_critic_final.pt")
@@ -101,6 +133,7 @@ def run_ppo(args):
 def save_results(env_name, history, metrics, agent):
     save_prefix = env_name.split("/")[-1]
     utils.plot_running_avg(history, save_prefix)
+    utils.plot_critic_val(metrics["average_critic_value"], save_prefix)
     df = pd.DataFrame(metrics)
     df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
     save_best_version(env_name, agent)

@@ -39,31 +39,6 @@ def save_animation(frames, filename):
 
 
 def plot_running_avg(scores, env):
-    """
-    Plot the running average of scores with a window of 100 games.
-
-    This function calculates the running average of a list of scores and
-    plots the result using matplotlib. The running average is calculated
-    over a window of 100 games, providing a smooth plot of score trends over time.
-
-    Parameters
-    ----------
-    scores : list or numpy.ndarray
-        A list or numpy array containing the scores from consecutive games.
-
-    Notes
-    -----
-    This function assumes that `scores` is a list or array of numerical values
-    that represent the scores obtained in each game or episode. The running
-    average is computed and plotted, which is useful for visualizing performance
-    trends in tasks such as games or simulations.
-
-    Examples
-    --------
-    >>> scores = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    >>> plot_running_avg(scores)
-    This will plot a graph showing the running average of the scores over a window of 10 games.
-    """
     avg = np.zeros_like(scores)
     for i in range(len(scores)):
         avg[i] = np.mean(scores[max(0, i - 100) : i + 1])
@@ -72,5 +47,17 @@ def plot_running_avg(scores, env):
     plt.xlabel("Episode")
     plt.ylabel("Average Score")
     plt.grid(True)
+    plt.tight_layout()
     plt.savefig(f"metrics/{env}_running_avg.png")
+    plt.close()
+
+
+def plot_critic_val(vals, env):
+    plt.plot(vals)
+    plt.title("Average Critic Value of Fixed States")
+    plt.xlabel("Episode")
+    plt.ylabel("Average Value")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(f"metrics/{env}_critic_val.png")
     plt.close()
