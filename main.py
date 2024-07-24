@@ -7,30 +7,33 @@ import warnings
 from argparse import ArgumentParser
 import pandas as pd
 from preprocess import AtariEnv
+from ale_py import ALEInterface, LoggerMode
 from config import environments
+import torch
 
 warnings.simplefilter("ignore")
-
+ALEInterface.setLoggerMode(LoggerMode.Error)
 
 def run_ppo(args):
-    if "ALE" in args.env or "NoFrameskip" in args.env:
-        env = AtariEnv(
+    def make_env():
+        return AtariEnv(
             args.env,
             shape=(84, 84),
             repeat=4,
             clip_rewards=True,
         ).make()
-    else:
-        env = gym.make(args.env, render_mode="rgb_array")
+
+    envs = gym.vector.AsyncVectorEnv([make_env for _ in range(args.n_envs)])
     save_prefix = args.env.split("/")[-1]
 
     print(f"\nEnvironment: {save_prefix}")
-    print(f"Obs.Space: {env.observation_space.shape} Act.Space: {env.action_space.n}")
+    print(f"Obs.Space: {envs.single_observation_space.shape}")
+    print(f"Act.Space: {envs.single_action_space.n}")
 
     agent = DiscretePPOAgent(
         args.env,
-        env.observation_space.shape,
-        env.action_space.n,
+        envs.single_observation_space.shape,
+        envs.single_action_space.n,
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
     )
@@ -39,28 +42,38 @@ def run_ppo(args):
         if os.path.exists(f"weights/{save_prefix}_actor.pt"):
             agent.load_checkpoints()
 
-    n_steps, n_learn, best_score = 0, 0, float("-inf")
+    best_score = min(envs.reward_range)
+    scores = np.zeros(args.n_envs)
+
     history, metrics = [], []
+    n_steps, episode = 0, 0
 
-    for i in range(args.n_games):
-        state, _ = env.reset()
+    states, _ = envs.reset()
+    while len(history) < args.n_games:
+        apvs = [agent.choose_action(state) for state in states]
+        actions, probs, values = list(map(list, zip(*apvs)))
 
-        term, trunc, score = False, False, 0
-        while not term and not trunc:
-            action, prob, value = agent.choose_action(state)
-            next_state, reward, term, trunc, _ = env.step(action)
+        next_states, rewards, term, trunc, _ = envs.step(actions)
 
-            agent.remember(state, value, action, prob, reward, term or trunc)
+        for j in range(args.n_envs):
+            agent.remember(
+                states[j], 
+                values[j], 
+                actions[j], 
+                probs[j], 
+                rewards[j], 
+                term[j] or trunc[j])
+            
+            scores[j] += rewards[j]
+            if term[j] or trunc[j]:
+                history.append(scores[j])
+                scores[j] = 0
 
-            n_steps += 1
-            if n_steps > args.batch_size and n_steps % args.horizon == 0:
-                agent.learn()
-                n_learn += 1
+        n_steps += 1
+        if n_steps > args.batch_size and n_steps % args.horizon == 0:
+            agent.learn()
 
-            score += reward
-            state = next_state
-
-        history.append(score)
+        states = next_states
         avg_score = np.mean(history[-100:])
 
         if avg_score > best_score:
@@ -69,17 +82,19 @@ def run_ppo(args):
 
         metrics.append(
             {
-                "episode": i + 1,
+                "episode": episode,
                 "average_score": avg_score,
                 "best_score": best_score,
             }
         )
 
-        print(
-            f"[{save_prefix} Episode {i + 1:04}/{args.n_games}]  Average Score = {avg_score:.2f}",
-            end="\r",
-        )
+        ep_str = f"[Episode {n_steps:6}]"
+        g_str = f"\tCompleted Games = {len(history):5}/{args.n_games}"
+        avg_str = f"\tAverage Score = {avg_score:.2f}"
+        print(ep_str + g_str + avg_str, end="\r")
 
+    torch.save(agent.actor.state_dict(), f"weights/{save_prefix}_actor_final.pt")
+    torch.save(agent.critic.state_dict(), f"weights/{save_prefix}_critic_final.pt")
     save_results(args.env, history, metrics, agent)
 
 
@@ -94,26 +109,19 @@ def save_results(env_name, history, metrics, agent):
 def save_best_version(env_name, agent, seeds=100):
     agent.load_checkpoints()
 
-    best_total_reward = float("-inf")
+    save_prefix = env_name.split("/")[-1]
+    env = AtariEnv(
+        env_name,
+        shape=(84, 84),
+        repeat=4,
+        clip_rewards=False,
+    ).make()
+
+    best_score = min(env.reward_range)
     best_frames = None
 
-    for _ in range(seeds):
-        # you know, I probably could just reset the environment...
-        # is reinitializing helping anything?
-        if "ALE" in env_name or "NoFrameskip" in args.env:
-            env = AtariEnv(
-                env_name,
-                shape=(84, 84),
-                repeat=4,
-                clip_rewards=True,
-                no_ops=0,
-                fire_first=False,
-            ).make()
-        else:
-            env = gym.make(env_name, render_mode="rgb_array")
-
-        save_prefix = env_name.split("/")[-1]
-        state, _ = env.reset()
+    for s in range(seeds):
+        state, _ = env.reset(seed=s)
 
         frames = []
         total_reward = 0
@@ -121,14 +129,15 @@ def save_best_version(env_name, agent, seeds=100):
         term, trunc = False, False
         while not term and not trunc:
             frames.append(env.render())
-            action, prob, value = agent.choose_action(state)
+            
+            action, _, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
 
             total_reward += reward
             state = next_state
 
-        if total_reward > best_total_reward:
-            best_total_reward = total_reward
+        if total_reward > best_score:
+            best_score = total_reward
             best_frames = frames
 
     save_prefix = env_name.split("/")[-1]
@@ -141,26 +150,32 @@ if __name__ == "__main__":
         "-e", "--env", default=None, help="Environment name from Gymnasium"
     )
     parser.add_argument(
+        "--n_envs",
+        default=8,
+        type=int,
+        help="Number of parallel environments during training",
+    )
+    parser.add_argument(
         "--n_games",
         default=20000,
         type=int,
-        help="Number of episodes (games) to run during training",
+        help="Total number of games to play during training",
     )
     parser.add_argument(
         "--n_epochs",
-        default=5,
+        default=4,
         type=int,
         help="Number of epochs during learning",
     )
     parser.add_argument(
         "--horizon",
-        default=2048,
+        default=128,
         type=int,
         help="Horizon, number of steps between learning",
     )
     parser.add_argument(
         "--batch_size",
-        default=64,
+        default=256,
         type=int,
         help="Batch size for learning",
     )
