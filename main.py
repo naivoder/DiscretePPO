@@ -25,20 +25,16 @@ def collect_fixed_states(env_name, n_envs=50, max_steps=10):
 
     envs = gym.vector.AsyncVectorEnv([make_env for _ in range(n_envs)])
     
-    fixed_states = np.zeros((n_envs * 2, 4, 84, 84), np.float32)
-    for _ in range(2):
-        states, _ = envs.reset()
+    states, _ = envs.reset()
 
-        steps = np.random.randint(1, max_steps)
-        for _ in range(steps):
-            actions = [envs.single_action_space.sample() for _ in range(n_envs)]
-            states, _, term, trunc, _ = envs.step(actions)
-            if term.any() or trunc.any():
-                break
+    steps = np.random.randint(1, max_steps)
+    for j in range(steps):
+        actions = [envs.single_action_space.sample() for _ in range(n_envs)]
+        states, _, term, trunc, _ = envs.step(actions)
+        if term.any() or trunc.any():
+            break
 
-        fixed_states.extend(states)
-
-    return torch.FloatTensor(fixed_states)
+    return torch.FloatTensor(states)
 
 def run_ppo(args):
     def make_env():
@@ -64,7 +60,7 @@ def run_ppo(args):
         batch_size=args.batch_size,
     )
 
-    fixed_states = collect_fixed_states(args.env, n_envs=50).to(agent.actor.device)
+    fixed_states = collect_fixed_states(args.env, n_envs=50).to(agent.critic.device)
 
     if args.continue_training:
         if os.path.exists(f"weights/{save_prefix}_actor.pt"):
@@ -108,7 +104,9 @@ def run_ppo(args):
             best_score = avg_score
             agent.save_checkpoints()
 
-        avg_val = np.mean([agent.critic(s) for s in fixed_states])
+        with torch.no_grad():
+            avg_val = agent.critic(fixed_states).mean().cpu().numpy()
+        avg_val *= 1e-9 # scaling it down, it gets huge
 
         metrics.append(
             {
@@ -119,10 +117,10 @@ def run_ppo(args):
             }
         )
 
-        ep_str = f"[Episode {n_steps:09}]"
-        g_str = f"\tGames = {len(history):05}/{args.n_games}"
-        avg_str = f"\tAvg. Score = {avg_score:.2f}"
-        crit_str = f"\tAvg. Critic Value = {avg_val:.2f}"
+        ep_str = f"[Ep. {n_steps:08}]"
+        g_str = f"  Games = {len(history):05}/{args.n_games}"
+        avg_str = f"  Avg. Score = {avg_score:.2f}"
+        crit_str = f"  Avg. Value = {avg_val:.4f}"
         print(ep_str + g_str + avg_str + crit_str, end="\r")
 
     torch.save(agent.actor.state_dict(), f"weights/{save_prefix}_actor_final.pt")
