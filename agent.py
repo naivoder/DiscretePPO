@@ -12,13 +12,13 @@ class DiscretePPOAgent:
         input_dims,
         n_actions,
         gamma=0.99,
-        alpha=1e-4,
+        alpha=3e-4,
         gae_lambda=0.95,
         policy_clip=0.1,
         batch_size=64,
-        n_epochs=10,
+        n_epochs=5,
         max_grad_norm=0.5,
-        entropy_coefficient=1e-2,
+        entropy_coefficient=0.01,
     ):
         self.env_name = env_name.split("/")[-1]
         self.gamma = gamma
@@ -37,7 +37,7 @@ class DiscretePPOAgent:
                 chkpt_dir=f"weights/{self.env_name}_actor.pt",
             )
             self.critic = CNNCritic(
-                input_dims, 1e-3, chkpt_dir=f"weights/{self.env_name}_critic.pt"
+                input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
             )
         else:
             print("Learning from features with MLP Policy")
@@ -53,8 +53,8 @@ class DiscretePPOAgent:
 
         self.memory = ReplayBuffer(batch_size)
 
-    def remember(self, state, state_, action, probs, reward, done):
-        self.memory.store_transition(state, state_, action, probs, reward, done)
+    def remember(self, state, value, action, probs, reward, done):
+        self.memory.store_transition(state, value, action, probs, reward, done)
 
     def save_checkpoints(self):
         self.actor.save_checkpoint()
@@ -108,10 +108,6 @@ class DiscretePPOAgent:
         reward_arr = torch.FloatTensor(reward_arr).to(self.critic.device)
 
         advantages_arr = reward_arr - value_arr
-        # print("")
-        # print("rewards:", reward_arr.shape)
-        # print("values:", value_arr.shape)
-        # print("advantages:", advantages_arr.shape)
 
         for _ in range(self.n_epochs):
             batches = self.memory.generate_batches()
@@ -123,10 +119,6 @@ class DiscretePPOAgent:
                 new_probs, values, entropy = self.evaluate_surrogate(states, actions)
 
                 prob_ratio = torch.exp(new_probs - old_probs)
-                # print("old_probs:", old_probs.shape)
-                # print("new_probs:", new_probs.shape)
-                # print("prov_ratio:", prob_ratio.shape)
-                # print("advantages:", advantages.shape)
 
                 # surrogate loss
                 weighted_probs = advantages * prob_ratio
@@ -136,14 +128,14 @@ class DiscretePPOAgent:
                 )
 
                 actor_loss = -torch.min(weighted_probs, weighted_clipped_probs)
-                # print("actor_loss:", actor_loss.shape)
-                # print("entropy:", entropy.shape)
                 actor_loss -= self.entropy_coefficient * entropy.squeeze()
 
                 self.actor.optimizer.zero_grad()
                 self.critic.optimizer.zero_grad()
                 loss = actor_loss.mean() + 0.5 * (values - returns[batch]).pow(2).mean()
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.actor.parameters(), self.max_grad_norm)
+                torch.nn.utils.clip_grad_norm_(self.critic.parameters(), self.max_grad_norm)
                 self.actor.optimizer.step()
                 self.critic.optimizer.step()
 
