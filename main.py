@@ -106,7 +106,7 @@ def run_ppo(args):
 
         with torch.no_grad():
             avg_val = agent.critic(fixed_states).mean().cpu().numpy()
-        avg_val *= 1e-9 # scaling it down, it gets huge
+        avg_val *= 1e-12 # scaling it down, it gets huge
 
         metrics.append(
             {
@@ -120,7 +120,7 @@ def run_ppo(args):
         ep_str = f"[Ep. {n_steps:08}]"
         g_str = f"  Games = {len(history):05}/{args.n_games}"
         avg_str = f"  Avg. Score = {avg_score:.2f}"
-        crit_str = f"  Avg. Value = {avg_val:.4f}"
+        crit_str = f"  Avg. Value = {avg_val:.6f}"
         print(ep_str + g_str + avg_str + crit_str, end="\r")
 
     torch.save(agent.actor.state_dict(), f"weights/{save_prefix}_actor_final.pt")

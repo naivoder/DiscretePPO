@@ -100,6 +100,7 @@ class CNNActor(torch.nn.Module):
         torch.nn.init.orthogonal_(layer.weight, std)
         torch.nn.init.constant_(layer.bias, 0)
         if scale:
+            # taken from some survey paper, I can't remember right now
             layer.weight.data.mul_(1/100)
         return layer
 
@@ -149,6 +150,7 @@ class CNNCritic(torch.nn.Module):
         torch.nn.init.orthogonal_(layer.weight, std)
         torch.nn.init.constant_(layer.bias, 0)
         if scale:
+            # taken from some survey paper, I can't remember right now
             layer.weight.data.mul_(1/100)
         return layer
 
