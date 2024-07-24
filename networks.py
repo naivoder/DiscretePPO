@@ -89,16 +89,18 @@ class CNNActor(torch.nn.Module):
 
         self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
         self.fc1 = self._init_weights(torch.nn.Linear(self.fc1_input_dim, 512))
-        self.out = self._init_weights(torch.nn.Linear(512, n_actions), std=0.01)
+        self.out = self._init_weights(torch.nn.Linear(512, n_actions), std=0.01, scale=True)
 
         self.optimizer = torch.optim.AdamW(self.parameters(), alpha)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
-    def _init_weights(sefl, layer, std=np.sqrt(2), bias=0.0):
+    def _init_weights(self, layer, std=np.sqrt(2), scale=False):
         """taken from cleanrl implementation"""
         torch.nn.init.orthogonal_(layer.weight, std)
-        torch.nn.init.constant_(layer.bias, bias)
+        torch.nn.init.constant_(layer.bias, 0)
+        if scale:
+            layer.weight.data.mul_(1/100)
         return layer
 
     def _calculate_fc1_input_dim(self, input_shape):
@@ -136,16 +138,18 @@ class CNNCritic(torch.nn.Module):
 
         self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
         self.fc1 = self._init_weights(torch.nn.Linear(self.fc1_input_dim, 512))
-        self.out = self._init_weights(torch.nn.Linear(512, 1), std=1)
+        self.out = self._init_weights(torch.nn.Linear(512, 1), std=1.0)
 
         self.optimizer = torch.optim.AdamW(self.parameters(), alpha)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.to(self.device)
 
-    def _init_weights(sefl, layer, std=np.sqrt(2), bias=0.0):
+    def _init_weights(self, layer, std=np.sqrt(2), scale=False):
         """taken from cleanrl implementation"""
         torch.nn.init.orthogonal_(layer.weight, std)
-        torch.nn.init.constant_(layer.bias, bias)
+        torch.nn.init.constant_(layer.bias, 0)
+        if scale:
+            layer.weight.data.mul_(1/100)
         return layer
 
     def _calculate_fc1_input_dim(self, input_shape):
