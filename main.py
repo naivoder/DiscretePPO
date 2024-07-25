@@ -76,17 +76,16 @@ def run_ppo(args):
     while len(history) < args.n_games:
         with torch.no_grad():
             apvs = [agent.choose_action(state) for state in states]
-        actions, probs, values, _ = list(map(list, zip(*apvs)))
-        actions = [a.cpu().numpy().item() for a  in actions]
+        actions, probs, values = list(map(list, zip(*apvs)))
 
         next_states, rewards, term, trunc, _ = envs.step(actions)
 
         for j in range(args.n_envs):
             agent.remember(
                 states[j], 
-                values[j].cpu().numpy().item(), 
+                values[j], 
                 actions[j], 
-                probs[j].cpu().numpy().item(), 
+                probs[j], 
                 rewards[j], 
                 term[j] or trunc[j])
             
@@ -108,7 +107,6 @@ def run_ppo(args):
 
         with torch.no_grad():
             avg_val = agent.critic(fixed_states).mean().cpu().numpy()
-        avg_val *= 1e-12 # scaling it down, it gets huge
 
         metrics.append(
             {
@@ -162,7 +160,7 @@ def save_best_version(env_name, agent, seeds=100):
         while not term and not trunc:
             frames.append(env.render())
             
-            action, _, _, _ = agent.choose_action(state)
+            action, _, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
 
             total_reward += reward

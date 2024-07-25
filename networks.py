@@ -114,7 +114,7 @@ class CNNActor(torch.nn.Module):
         x = torch.nn.functional.relu(self.conv3(x))
         x = x.view(x.size()[0], -1)
         x = torch.nn.functional.relu(self.fc1(x))
-        x = self.out(x)
+        x = torch.nn.functional.softmax(self.out(x))
         return torch.distributions.Categorical(logits=x)
 
     def save_checkpoint(self):

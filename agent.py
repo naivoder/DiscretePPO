@@ -64,43 +64,51 @@ class DiscretePPOAgent:
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
 
-    def choose_action(self, state, action=None):
-        if isinstance(state, np.ndarray):
+    def choose_action(self, state):
             state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
-
-        dist = self.actor(state)
-        
-        if action == None:
+            dist = self.actor(state)
             action = dist.sample()
-        
-        prob = dist.log_prob(action)
-        value = self.critic(state)
-        entropy = dist.entropy()
+            prob = dist.log_prob(action)
+            value = self.critic(state)
+            return action.item(), prob.item(), value.item()
+    
+    # def choose_action(self, state, action=None):
+    #     if isinstance(state, np.ndarray):
+    #         state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
 
-        return action, prob, value, entropy
+    #     dist = self.actor(state)
+        
+    #     if action == None:
+    #         action = dist.sample()
+        
+    #     prob = dist.log_prob(action)
+    #     value = self.critic(state)
+    #     entropy = dist.entropy()
+
+    #     return action, prob, value, entropy
 
     def learn(self):
         state_arr, value_arr, action_arr, prob_arr, reward_arr, dones_arr = (
             self.memory.sample()
         )
 
-        returns = []
-        discounted_return = 0
-        for reward, done in zip(reversed(reward_arr), reversed(dones_arr)):
-            if done:
-                discounted_return = 0
-            discounted_return = reward + (self.gamma * discounted_return)
-            returns.insert(0, discounted_return)
-
-        returns_arr = torch.FloatTensor(np.array(returns)).to(self.critic.device)
+        advantage = np.zeros(len(reward_arr), dtype=np.float32)
+        for t in range(len(reward_arr)-1):
+            discount = 1
+            a_t = 0
+            for k in range(t, len(reward_arr)-1):
+                a_t += discount*(reward_arr[k] + self.gamma*value_arr[k+1]*\
+                        (1-int(dones_arr[k])) - value_arr[k])
+                discount *= self.gamma*self.gae_lambda
+            advantage[t] = a_t
+        
+        advantage_arr = torch.tensor(advantage).to(self.critic.device)
         state_arr = torch.FloatTensor(state_arr).to(self.critic.device)
         action_arr = torch.FloatTensor(action_arr).to(self.critic.device)
         prob_arr = torch.FloatTensor(prob_arr).to(self.critic.device)
         value_arr = torch.FloatTensor(value_arr).to(self.critic.device)
         dones_arr = torch.BoolTensor(dones_arr).to(self.critic.device)
         reward_arr = torch.FloatTensor(reward_arr).to(self.critic.device)
-
-        advantages_arr = reward_arr - value_arr
 
         for _ in range(self.n_epochs):
             batches = self.memory.generate_batches()
@@ -110,40 +118,59 @@ class DiscretePPOAgent:
                 actions = action_arr[batch]
                 old_values = value_arr[batch]
                 old_probs = prob_arr[batch]
-                advantages = advantages_arr[batch]
-                returns = returns_arr[batch]
+                advantages = advantage_arr[batch]
 
-                advantages = (advantages - advantages.mean())/(advantages.std() + 1e-12)
-                _, new_probs, new_values, entropy = self.choose_action(states, actions)
+                # advantages = (advantages - advantages.mean())/(advantages.std() + 1e-12)
+                # _, new_probs, new_values, entropy = self.choose_action(states, actions)
                 
-                logratio = new_probs - old_probs
-                ratio = logratio.exp()
+                # logratio = new_probs - old_probs
+                # ratio = logratio.exp()
 
-                weighted_probs = -advantages * ratio
-                weighted_clipped_probs = -(
-                    torch.clamp(ratio, 1 - self.policy_clip, 1 + self.policy_clip)
-                    * advantages
-                )
+                # weighted_probs = -advantages * ratio
+                # weighted_clipped_probs = -(
+                #     torch.clamp(ratio, 1 - self.policy_clip, 1 + self.policy_clip)
+                #     * advantages
+                # )
 
-                actor_loss = torch.max(weighted_probs, weighted_clipped_probs).mean()
-                
-                entropy_loss = self.entropy_coefficient * entropy.mean()
+                # actor_loss = torch.max(weighted_probs, weighted_clipped_probs).mean()
+                # actor_loss -= self.entropy_coefficient * entropy.mean()
 
-                unclipped_critic_loss = (new_values - returns).pow(2)
-                clipped_critic_loss = old_values + torch.clamp(new_values - old_values, -self.policy_clip, self.policy_clip)
-                clipped_critic_loss = (clipped_critic_loss - returns)**2
-                critic_loss = 0.5 * torch.max(unclipped_critic_loss, clipped_critic_loss).mean()
+                # unclipped_critic_loss = (new_values - returns).pow(2)
+                # clipped_critic_loss = old_values + torch.clamp(new_values - old_values, -self.policy_clip, self.policy_clip)
+                # clipped_critic_loss = (clipped_critic_loss - returns)**2
+                # critic_loss = 0.5 * torch.max(unclipped_critic_loss, clipped_critic_loss).mean()
 
+                # self.actor.optimizer.zero_grad()
+                # actor_loss.backward()
+                # torch.nn.utils.clip_grad_norm_(self.actor.parameters(), self.max_grad_norm)
+                # self.actor.optimizer.step()
 
-                loss = actor_loss - entropy_loss + 0.5 * critic_loss
+                # self.critic.optimizer.zero_grad()
+                # critic_loss.backward()
+                # torch.nn.utils.clip_grad_norm_(self.critic.parameters(), self.max_grad_norm)
+                # self.critic.optimizer.step()
+
+                dist = self.actor(states)
+                new_values = self.critic(states).squeeze()
+
+                new_probs = dist.log_prob(actions)
+                prob_ratio = new_probs.exp() / old_probs.exp()
+
+                weighted_probs = advantages * prob_ratio
+                weighted_clipped_probs = advantages * torch.clamp(prob_ratio, 1-self.policy_clip, 1+self.policy_clip)
+            
+                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs).mean()
+
+                returns = advantages + old_values
+                critic_loss = (returns-new_values).pow(2).mean()
+
+                loss = actor_loss + 0.5 * critic_loss
 
                 self.actor.optimizer.zero_grad()
                 self.critic.optimizer.zero_grad()
-
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.actor.parameters(), self.max_grad_norm)
                 torch.nn.utils.clip_grad_norm_(self.critic.parameters(), self.max_grad_norm)
-
                 self.actor.optimizer.step()
                 self.critic.optimizer.step()
 
