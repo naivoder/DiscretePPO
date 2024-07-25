@@ -19,8 +19,10 @@ def generate_animation(env_name):
         env.observation_space.shape,
         env.action_space.n)
     
-    agent.load_checkpoints()
-    
+    # agent.load_checkpoints()
+    agent.actor.load_state_dict(torch.load(f"weights/{env_name}_actor_final.pt"))
+    agent.critic.load_state_dict(torch.load(f"weights/{env_name}_critic_final.pt"))
+
     best_total_reward = float("-inf")
     best_frames = None
 

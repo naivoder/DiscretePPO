@@ -135,33 +135,33 @@ python main.py --env 'LunarLander-v2'
         </td>
     </tr>
 </table>
-<!-- <table>
+<table>
     <tr>
         <td>
-            <p><b>MsPacman-v5</b></p>
-            <img src="environments/MsPacman-v5.gif" width="250" height="250"/>
+            <p><b>BattleZone</b></p>
+            <img src="environments/BattleZoneNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <td>
+        <!-- <td>
             <p><b>SpaceInvaders-v5</b></p>
             <img src="environments/SpaceInvaders-v5.gif" width="250" height="250"/>
         </td>
         <td>
             <p><b>Tetris-v5</b></p>
             <img src="environments/Tetris-v5.gif" width="250" height="250"/>
-        </td>
+        </td> -->
     </tr>
     <tr>
         <td>
-            <img src="metrics/MsPacman-v5_running_avg.png" width="250" height="250"/>
+            <img src="metrics/BattleZoneNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>
-        <td>
+        <!-- <td>
             <img src="metrics/SpaceInvaders-v5_running_avg.png" width="250" height="250"/>
         </td>
         <td>
             <img src="metrics/Tetris-v5_running_avg.png" width="250" height="250"/>
-        </td>
+        </td> -->
     </tr>
-</table>  -->
+</table> 
 
 It's very interesting that PPO struggles to solve the MountainCar environment (solved easily by DDPG). I found this comment from `/u/jurniss` on Reddit very insightful:
 
