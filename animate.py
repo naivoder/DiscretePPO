@@ -32,7 +32,8 @@ def generate_animation(env_name):
         term, trunc = False, False
         while not term and not trunc:
             frames.append(env.render())
-            action, _, _ = agent.choose_action(state)
+            with torch.no_grad():
+                action, _, _, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
             state = next_state
             total_reward += reward

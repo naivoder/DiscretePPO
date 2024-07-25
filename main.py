@@ -121,18 +121,17 @@ def run_ppo(args):
         ep_str = f"[Ep. {n_steps:08}]"
         g_str = f"  Games = {len(history):05}/{args.n_games}"
         avg_str = f"  Avg. Score = {avg_score:.2f}"
-        crit_str = f"  Avg. Value = {avg_val:.6f}"
+        crit_str = f"  Avg. Value = {avg_val:.4e}"
         print(ep_str + g_str + avg_str + crit_str, end="\r")
 
     torch.save(agent.actor.state_dict(), f"weights/{save_prefix}_actor_final.pt")
     torch.save(agent.critic.state_dict(), f"weights/{save_prefix}_critic_final.pt")
     save_results(args.env, history, metrics, agent)
 
-
 def save_results(env_name, history, metrics, agent):
     save_prefix = env_name.split("/")[-1]
     utils.plot_running_avg(history, save_prefix)
-    utils.plot_critic_val(metrics["average_critic_value"], save_prefix)
+    # utils.plot_critic_val(metrics["average_critic_value"], save_prefix)
     df = pd.DataFrame(metrics)
     df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
     save_best_version(env_name, agent)
