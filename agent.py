@@ -64,27 +64,22 @@ class DiscretePPOAgent:
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
 
-    def choose_action(self, state):
-        with torch.no_grad():
-            state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
+    def choose_action(self, state, action=None):
+        state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
 
-            dist = self.actor(state)
+        dist = self.actor(state)
+        if action == None:
             action = dist.sample()
-            prob = dist.log_prob(action)
-            value = self.critic(state)
+        prob = dist.log_prob(action)
+        value = self.critic(state)
+        entropy = dist.entropy()
 
         return (
             action.cpu().numpy().flatten().item(),
             prob.cpu().numpy().flatten().item(),
             value.cpu().numpy().flatten().item(),
+            entropy.cpu().numpy().flatten().item()
         )
-
-    def evaluate_surrogate(self, state, action):
-        dist = self.actor(state)
-        prob = dist.log_prob(action)
-        entropy = dist.entropy()
-        value = self.critic(state)
-        return prob, entropy, value
 
     def learn(self):
         state_arr, value_arr, action_arr, prob_arr, reward_arr, dones_arr = (
@@ -98,8 +93,8 @@ class DiscretePPOAgent:
                 discounted_return = 0
             discounted_return = reward + (self.gamma * discounted_return)
             returns.insert(0, discounted_return)
-        returns = torch.FloatTensor(np.array(returns)).to(self.critic.device)
 
+        returns_arr = torch.FloatTensor(np.array(returns)).to(self.critic.device)
         state_arr = torch.FloatTensor(state_arr).to(self.critic.device)
         action_arr = torch.FloatTensor(action_arr).to(self.critic.device)
         prob_arr = torch.FloatTensor(prob_arr).to(self.critic.device)
@@ -111,31 +106,46 @@ class DiscretePPOAgent:
 
         for _ in range(self.n_epochs):
             batches = self.memory.generate_batches()
+            
             for batch in batches:
                 states = state_arr[batch]
                 actions = action_arr[batch]
+                old_values = value_arr[batch]
                 old_probs = prob_arr[batch]
                 advantages = advantages_arr[batch]
-                new_probs, values, entropy = self.evaluate_surrogate(states, actions)
+                returns = returns_arr[batch]
 
-                prob_ratio = torch.exp(new_probs - old_probs)
+                advantages = (advantages - advantages.mean())/(advantages.std() + 1e-12)
+                _, new_probs, new_values, entropy = self.choose_action(states, actions)
+                
+                logratio = new_probs - old_probs
+                ratio = logratio.exp()
 
-                # surrogate loss
-                weighted_probs = advantages * prob_ratio
-                weighted_clipped_probs = (
-                    torch.clamp(prob_ratio, 1 - self.policy_clip, 1 + self.policy_clip)
+                weighted_probs = -advantages * ratio
+                weighted_clipped_probs = -(
+                    torch.clamp(ratio, 1 - self.policy_clip, 1 + self.policy_clip)
                     * advantages
                 )
 
-                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs)
-                actor_loss -= self.entropy_coefficient * entropy.squeeze()
+                actor_loss = torch.max(weighted_probs, weighted_clipped_probs).mean()
+                
+                entropy_loss = self.entropy_coefficient * entropy.mean()
+
+                unclipped_critic_loss = (new_values - returns).pow(2)
+                clipped_critic_loss = old_values + torch.clamp(new_values - old_values, -self.policy_clip, self.policy_clip)
+                clipped_critic_loss = (clipped_critic_loss - returns)**2
+                critic_loss = 0.5 * torch.max(unclipped_critic_loss, clipped_critic_loss).mean()
+
+
+                loss = actor_loss - entropy_loss + 0.5 * critic_loss
 
                 self.actor.optimizer.zero_grad()
                 self.critic.optimizer.zero_grad()
-                loss = actor_loss.mean() + 0.5 * (values - returns[batch]).pow(2).mean()
+
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.actor.parameters(), self.max_grad_norm)
                 torch.nn.utils.clip_grad_norm_(self.critic.parameters(), self.max_grad_norm)
+
                 self.actor.optimizer.step()
                 self.critic.optimizer.step()
 

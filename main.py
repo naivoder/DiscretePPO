@@ -74,8 +74,9 @@ def run_ppo(args):
 
     states, _ = envs.reset()
     while len(history) < args.n_games:
-        apvs = [agent.choose_action(state) for state in states]
-        actions, probs, values = list(map(list, zip(*apvs)))
+        with torch.no_grad():
+            apvs = [agent.choose_action(state) for state in states]
+        actions, probs, values, _ = list(map(list, zip(*apvs)))
 
         next_states, rewards, term, trunc, _ = envs.step(actions)
 
@@ -161,7 +162,7 @@ def save_best_version(env_name, agent, seeds=100):
         while not term and not trunc:
             frames.append(env.render())
             
-            action, _, _ = agent.choose_action(state)
+            action, _, _, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
 
             total_reward += reward
