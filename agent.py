@@ -65,21 +65,19 @@ class DiscretePPOAgent:
         self.critic.load_checkpoint()
 
     def choose_action(self, state, action=None):
-        state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
+        if isinstance(state, np.ndarray):
+            state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
 
         dist = self.actor(state)
+        
         if action == None:
             action = dist.sample()
+        
         prob = dist.log_prob(action)
         value = self.critic(state)
         entropy = dist.entropy()
 
-        return (
-            action.cpu().numpy().flatten().item(),
-            prob.cpu().numpy().flatten().item(),
-            value.cpu().numpy().flatten().item(),
-            entropy.cpu().numpy().flatten().item()
-        )
+        return action, prob, value, entropy
 
     def learn(self):
         state_arr, value_arr, action_arr, prob_arr, reward_arr, dones_arr = (

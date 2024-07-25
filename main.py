@@ -77,15 +77,16 @@ def run_ppo(args):
         with torch.no_grad():
             apvs = [agent.choose_action(state) for state in states]
         actions, probs, values, _ = list(map(list, zip(*apvs)))
+        actions = [a.cpu().numpy().item() for a  in actions]
 
         next_states, rewards, term, trunc, _ = envs.step(actions)
 
         for j in range(args.n_envs):
             agent.remember(
                 states[j], 
-                values[j], 
+                values[j].cpu().numpy().item(), 
                 actions[j], 
-                probs[j], 
+                probs[j].cpu().numpy().item(), 
                 rewards[j], 
                 term[j] or trunc[j])
             
