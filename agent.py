@@ -78,7 +78,6 @@ class DiscretePPOAgent:
         self.clip_value = clip_value
 
         self.network = ActorCritic(input_dims, n_actions, alpha, f"weights/{env_name}.pt")
-
         self.memory = ReplayBuffer(batch_size)
 
     def remember(self, state, value, action, probs, reward, done):
@@ -102,6 +101,7 @@ class DiscretePPOAgent:
             self.memory.sample()
         )
 
+        # https://github.com/philtabor/.../ppo_torch.py
         advantage = np.zeros(len(reward_arr), dtype=np.float32)
         for t in range(len(reward_arr)-1):
             discount = 1
@@ -112,13 +112,13 @@ class DiscretePPOAgent:
                 discount *= self.gamma*self.gae_lambda
             advantage[t] = a_t
         
-        advantage_arr = torch.tensor(advantage).to(self.network.device)
+        advantage_arr = torch.FloatTensor(advantage).to(self.network.device)
         state_arr = torch.FloatTensor(state_arr).to(self.network.device)
         action_arr = torch.FloatTensor(action_arr).to(self.network.device)
         prob_arr = torch.FloatTensor(prob_arr).to(self.network.device)
         value_arr = torch.FloatTensor(value_arr).to(self.network.device)
-        dones_arr = torch.BoolTensor(dones_arr).to(self.network.device)
         reward_arr = torch.FloatTensor(reward_arr).to(self.network.device)
+        dones_arr = torch.BoolTensor(dones_arr).to(self.network.device)
 
         for _ in range(self.n_epochs):
             batches = self.memory.generate_batches()

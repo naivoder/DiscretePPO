@@ -14,26 +14,6 @@ import torch
 warnings.simplefilter("ignore")
 ALEInterface.setLoggerMode(LoggerMode.Error)
 
-def collect_fixed_states(env_name, n_envs=50, max_steps=50):
-    def make_env():
-        return AtariEnv(
-            env_name,
-            shape=(84, 84),
-            repeat=4,
-            clip_rewards=True,
-        ).make()
-
-    envs = gym.vector.AsyncVectorEnv([make_env for _ in range(n_envs)])
-    
-    states, _ = envs.reset()
-
-    steps = np.random.randint(1, max_steps)
-    for _ in range(steps):
-        actions = [envs.single_action_space.sample() for _ in range(n_envs)]
-        states, _, _, _, _ = envs.step(actions)
-
-    return torch.FloatTensor(states)
-
 def run_ppo(args):
     def make_env():
         return AtariEnv(
@@ -58,7 +38,8 @@ def run_ppo(args):
         batch_size=args.batch_size,
     )
 
-    fixed_states = collect_fixed_states(args.env, n_envs=50).to(agent.network.device)
+    fixed_states = utils.collect_fixed_states(envs)
+    fixed_states = torch.tensor(fixed_states).to(agent.network.device)
 
     if args.continue_training:
         if os.path.exists(f"weights/{save_prefix}_actor.pt"):
