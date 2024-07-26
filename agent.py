@@ -1,9 +1,56 @@
 import torch
-from networks import Actor, Critic, CNNActor, CNNCritic
 from memory import ReplayBuffer
 import numpy as np
 
+class ActorCritic(torch.nn.Module):
+    def __init__(self, input_dims, n_actions, alpha=1e-4, chkpt_dir="weights/network.pt"):
+        super(ActorCritic, self).__init__()
+        self.input_dims = input_dims
+        self.n_actions = n_actions
+        self.chkpt_dir = chkpt_dir
 
+        self.conv1 = self._init_weights(torch.nn.Conv2d(input_dims[0], 32, kernel_size=8, stride=4))
+        self.conv2 = self._init_weights(torch.nn.Conv2d(32, 64, kernel_size=4, stride=2))
+        self.conv3 = self._init_weights(torch.nn.Conv2d(64, 64, kernel_size=3, stride=1))
+
+        self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
+        self.fc1 = self._init_weights(torch.nn.Linear(self.fc1_input_dim, 512))
+        self.critic = self._init_weights(torch.nn.Linear(512, 1), std=1.0)
+        self.actor = self._init_weights(torch.nn.Linear(512, n_actions), std=0.01)
+
+        self.optimizer = torch.optim.AdamW(self.parameters(), alpha)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.to(self.device)
+
+    def _init_weights(self, layer, std=np.sqrt(2), scale=False):
+        """taken from cleanrl implementation"""
+        torch.nn.init.orthogonal_(layer.weight, std)
+        torch.nn.init.constant_(layer.bias, 0)
+        return layer
+
+    def _calculate_fc1_input_dim(self, input_shape):
+        dummy_input = torch.zeros(1, *input_shape)
+        x = torch.nn.functional.relu(self.conv1(dummy_input))
+        x = torch.nn.functional.relu(self.conv2(x))
+        x = torch.nn.functional.relu(self.conv3(x))
+        return x.numel()  # count flattened elements
+
+    def forward(self, x):
+        x = torch.nn.functional.relu(self.conv1(x))
+        x = torch.nn.functional.relu(self.conv2(x))
+        x = torch.nn.functional.relu(self.conv3(x))
+        x = x.view(x.size()[0], -1)
+        x = torch.nn.functional.relu(self.fc1(x))
+        value = self.critic(x)
+        x = torch.nn.functional.softmax(self.actor(x))
+        action = torch.distributions.Categorical(logits=x)
+        return action, value
+
+    def save_checkpoint(self):
+        torch.save(self.state_dict(), self.chkpt_dir)
+
+    def load_checkpoint(self):
+        self.load_state_dict(torch.load(self.chkpt_dir))
 
 class DiscretePPOAgent:
     def __init__(
@@ -12,13 +59,14 @@ class DiscretePPOAgent:
         input_dims,
         n_actions,
         gamma=0.99,
-        alpha=3e-4,
+        alpha=2.5e-4,
         gae_lambda=0.95,
         policy_clip=0.1,
         batch_size=64,
         n_epochs=5,
         max_grad_norm=0.5,
         entropy_coefficient=0.01,
+        clip_value=True,
     ):
         self.env_name = env_name.split("/")[-1]
         self.gamma = gamma
@@ -27,29 +75,9 @@ class DiscretePPOAgent:
         self.gae_lambda = gae_lambda
         self.entropy_coefficient = entropy_coefficient
         self.max_grad_norm = max_grad_norm
+        self.clip_value = clip_value
 
-        if "ALE/" in env_name or "NoFrameskip" in env_name:
-            print("Learning from pixels with CNN Policy")
-            self.actor = CNNActor(
-                input_dims,
-                n_actions,
-                alpha,
-                chkpt_dir=f"weights/{self.env_name}_actor.pt",
-            )
-            self.critic = CNNCritic(
-                input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
-            )
-        else:
-            print("Learning from features with MLP Policy")
-            self.actor = Actor(
-                input_dims,
-                n_actions,
-                alpha,
-                chkpt_dir=f"weights/{self.env_name}_actor.pt",
-            )
-            self.critic = Critic(
-                input_dims, alpha, chkpt_dir=f"weights/{self.env_name}_critic.pt"
-            )
+        self.network = ActorCritic(input_dims, n_actions, alpha, f"weights/{env_name}.pt")
 
         self.memory = ReplayBuffer(batch_size)
 
@@ -57,35 +85,17 @@ class DiscretePPOAgent:
         self.memory.store_transition(state, value, action, probs, reward, done)
 
     def save_checkpoints(self):
-        self.actor.save_checkpoint()
-        self.critic.save_checkpoint()
+        self.network.save_checkpoint()
 
     def load_checkpoints(self):
-        self.actor.load_checkpoint()
-        self.critic.load_checkpoint()
+        self.network.load_checkpoint()
 
     def choose_action(self, state):
-            state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
-            dist = self.actor(state)
-            action = dist.sample()
-            prob = dist.log_prob(action)
-            value = self.critic(state)
-            return action.item(), prob.item(), value.item()
-    
-    # def choose_action(self, state, action=None):
-    #     if isinstance(state, np.ndarray):
-    #         state = torch.FloatTensor(state).to(self.actor.device).unsqueeze(0)
-
-    #     dist = self.actor(state)
-        
-    #     if action == None:
-    #         action = dist.sample()
-        
-    #     prob = dist.log_prob(action)
-    #     value = self.critic(state)
-    #     entropy = dist.entropy()
-
-    #     return action, prob, value, entropy
+        state = torch.FloatTensor(state).to(self.network.device).unsqueeze(0)
+        dist, value = self.network(state)
+        action = dist.sample()
+        prob = dist.log_prob(action)
+        return action.item(), prob.item(), value.item()
 
     def learn(self):
         state_arr, value_arr, action_arr, prob_arr, reward_arr, dones_arr = (
@@ -102,13 +112,13 @@ class DiscretePPOAgent:
                 discount *= self.gamma*self.gae_lambda
             advantage[t] = a_t
         
-        advantage_arr = torch.tensor(advantage).to(self.critic.device)
-        state_arr = torch.FloatTensor(state_arr).to(self.critic.device)
-        action_arr = torch.FloatTensor(action_arr).to(self.critic.device)
-        prob_arr = torch.FloatTensor(prob_arr).to(self.critic.device)
-        value_arr = torch.FloatTensor(value_arr).to(self.critic.device)
-        dones_arr = torch.BoolTensor(dones_arr).to(self.critic.device)
-        reward_arr = torch.FloatTensor(reward_arr).to(self.critic.device)
+        advantage_arr = torch.tensor(advantage).to(self.network.device)
+        state_arr = torch.FloatTensor(state_arr).to(self.network.device)
+        action_arr = torch.FloatTensor(action_arr).to(self.network.device)
+        prob_arr = torch.FloatTensor(prob_arr).to(self.network.device)
+        value_arr = torch.FloatTensor(value_arr).to(self.network.device)
+        dones_arr = torch.BoolTensor(dones_arr).to(self.network.device)
+        reward_arr = torch.FloatTensor(reward_arr).to(self.network.device)
 
         for _ in range(self.n_epochs):
             batches = self.memory.generate_batches()
@@ -119,39 +129,9 @@ class DiscretePPOAgent:
                 old_values = value_arr[batch]
                 old_probs = prob_arr[batch]
                 advantages = advantage_arr[batch]
-
-                # advantages = (advantages - advantages.mean())/(advantages.std() + 1e-12)
-                # _, new_probs, new_values, entropy = self.choose_action(states, actions)
                 
-                # logratio = new_probs - old_probs
-                # ratio = logratio.exp()
-
-                # weighted_probs = -advantages * ratio
-                # weighted_clipped_probs = -(
-                #     torch.clamp(ratio, 1 - self.policy_clip, 1 + self.policy_clip)
-                #     * advantages
-                # )
-
-                # actor_loss = torch.max(weighted_probs, weighted_clipped_probs).mean()
-                # actor_loss -= self.entropy_coefficient * entropy.mean()
-
-                # unclipped_critic_loss = (new_values - returns).pow(2)
-                # clipped_critic_loss = old_values + torch.clamp(new_values - old_values, -self.policy_clip, self.policy_clip)
-                # clipped_critic_loss = (clipped_critic_loss - returns)**2
-                # critic_loss = 0.5 * torch.max(unclipped_critic_loss, clipped_critic_loss).mean()
-
-                # self.actor.optimizer.zero_grad()
-                # actor_loss.backward()
-                # torch.nn.utils.clip_grad_norm_(self.actor.parameters(), self.max_grad_norm)
-                # self.actor.optimizer.step()
-
-                # self.critic.optimizer.zero_grad()
-                # critic_loss.backward()
-                # torch.nn.utils.clip_grad_norm_(self.critic.parameters(), self.max_grad_norm)
-                # self.critic.optimizer.step()
-
-                dist = self.actor(states)
-                new_values = self.critic(states).squeeze()
+                dist, new_vals = self.network(states)
+                new_values = new_vals.squeeze()
 
                 new_probs = dist.log_prob(actions)
                 prob_ratio = new_probs.exp() / old_probs.exp()
@@ -159,19 +139,24 @@ class DiscretePPOAgent:
                 weighted_probs = advantages * prob_ratio
                 weighted_clipped_probs = advantages * torch.clamp(prob_ratio, 1-self.policy_clip, 1+self.policy_clip)
             
-                actor_loss = -torch.min(weighted_probs, weighted_clipped_probs).mean()
+                actor_loss = torch.min(weighted_probs, weighted_clipped_probs).mean()
+                actor_loss -= self.entropy_coefficient * dist.entropy().mean()
 
                 returns = advantages + old_values
-                critic_loss = (returns-new_values).pow(2).mean()
+
+                if self.clip_value:
+                    unclipped_critic_loss = (new_values - returns).pow(2)
+                    clipped_critic_loss = old_values + torch.clamp(new_values - old_values, -self.policy_clip, self.policy_clip)
+                    clipped_critic_loss = (clipped_critic_loss - returns)**2
+                    critic_loss = 0.5 * torch.max(unclipped_critic_loss, clipped_critic_loss).mean()
+                else:
+                    critic_loss = (returns-new_values).pow(2).mean()
 
                 loss = actor_loss + 0.5 * critic_loss
 
-                self.actor.optimizer.zero_grad()
-                self.critic.optimizer.zero_grad()
+                self.network.optimizer.zero_grad()
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.actor.parameters(), self.max_grad_norm)
-                torch.nn.utils.clip_grad_norm_(self.critic.parameters(), self.max_grad_norm)
-                self.actor.optimizer.step()
-                self.critic.optimizer.step()
+                torch.nn.utils.clip_grad_norm_(self.network.parameters(), self.max_grad_norm)
+                self.network.optimizer.step()
 
         self.memory.clear_memory()

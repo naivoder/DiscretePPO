@@ -14,7 +14,7 @@ import torch
 warnings.simplefilter("ignore")
 ALEInterface.setLoggerMode(LoggerMode.Error)
 
-def collect_fixed_states(env_name, n_envs=50, max_steps=10):
+def collect_fixed_states(env_name, n_envs=50, max_steps=50):
     def make_env():
         return AtariEnv(
             env_name,
@@ -28,11 +28,9 @@ def collect_fixed_states(env_name, n_envs=50, max_steps=10):
     states, _ = envs.reset()
 
     steps = np.random.randint(1, max_steps)
-    for j in range(steps):
+    for _ in range(steps):
         actions = [envs.single_action_space.sample() for _ in range(n_envs)]
-        states, _, term, trunc, _ = envs.step(actions)
-        if term.any() or trunc.any():
-            break
+        states, _, _, _, _ = envs.step(actions)
 
     return torch.FloatTensor(states)
 
@@ -60,7 +58,7 @@ def run_ppo(args):
         batch_size=args.batch_size,
     )
 
-    fixed_states = collect_fixed_states(args.env, n_envs=50).to(agent.critic.device)
+    fixed_states = collect_fixed_states(args.env, n_envs=50).to(agent.network.device)
 
     if args.continue_training:
         if os.path.exists(f"weights/{save_prefix}_actor.pt"):
@@ -106,7 +104,8 @@ def run_ppo(args):
             agent.save_checkpoints()
 
         with torch.no_grad():
-            avg_val = agent.critic(fixed_states).mean().cpu().numpy()
+            _, avg_val = agent.network(fixed_states)
+        avg_val = avg_val.mean().cpu().numpy()
 
         metrics.append(
             {
@@ -123,8 +122,7 @@ def run_ppo(args):
         crit_str = f"  Avg. Value = {avg_val:.4e}"
         print(ep_str + g_str + avg_str + crit_str, end="\r")
 
-    torch.save(agent.actor.state_dict(), f"weights/{save_prefix}_actor_final.pt")
-    torch.save(agent.critic.state_dict(), f"weights/{save_prefix}_critic_final.pt")
+    torch.save(agent.network.state_dict(), f"weights/{save_prefix}_final.pt")
     save_results(args.env, history, metrics, agent)
 
 def save_results(env_name, history, metrics, agent):
