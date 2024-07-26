@@ -148,11 +148,11 @@ class DiscretePPOAgent:
                     unclipped_critic_loss = (new_values - returns).pow(2)
                     clipped_values = old_values + torch.clamp(new_values - old_values, -self.policy_clip, self.policy_clip)
                     clipped_critic_loss = (clipped_values - returns).pow(2)
-                    critic_loss = 0.5 * torch.max(unclipped_critic_loss, clipped_critic_loss).mean()
+                    critic_loss = torch.max(unclipped_critic_loss, clipped_critic_loss).mean()
                 else:
                     critic_loss = (returns-new_values).pow(2).mean()
 
-                loss = actor_loss + critic_loss
+                loss = actor_loss + 0.5 * critic_loss
 
                 self.network.optimizer.zero_grad()
                 loss.backward()
