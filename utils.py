@@ -2,13 +2,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import imageio
 
-def collect_fixed_states(envs, n_envs, max_steps=50): 
-    states, _ = envs.reset()
-    steps = np.random.randint(1, max_steps)
-    for _ in range(steps):
-        actions = [envs.single_action_space.sample() for _ in range(n_envs)]
-        states, _, _, _, _ = envs.step(actions)
-    return states
+def collect_fixed_states(envs, n_envs, steps=5): 
+    """
+    Collect some fixed initial states for monitoring average critic value
+    This has shown to be an indicator of bugs in my code, so I'm sort of 
+    approximating this idea from the DQN paper (where they actually 
+    calculate the rollouts...) anyways, these should mostly be high value
+    so we can use this value to track learning
+    """
+    shape = (n_envs * steps, *envs.single_observation_space.shape)
+    fixed_states = np.zeros(shape, dtype=np.float32)
+    for i in range(steps):
+        states, _ = envs.reset()
+        start = i * n_envs
+        end = start + n_envs
+        fixed_states[start:end,...] = states
+    return fixed_states
 
 def save_animation(frames, filename):
     with imageio.get_writer(filename, mode="I", loop=0) as writer:
