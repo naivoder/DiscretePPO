@@ -38,7 +38,7 @@ def run_ppo(args):
         batch_size=args.batch_size,
     )
 
-    fixed_states = utils.collect_fixed_states(envs)
+    fixed_states = utils.collect_fixed_states(envs, args.n_envs)
     fixed_states = torch.tensor(fixed_states).to(agent.network.device)
 
     if args.continue_training:

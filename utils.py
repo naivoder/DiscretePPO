@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import imageio
 
-def collect_fixed_states(envs, max_steps=50): 
+def collect_fixed_states(envs, n_envs, max_steps=50): 
     states, _ = envs.reset()
     steps = np.random.randint(1, max_steps)
     for _ in range(steps):
-        actions = [envs.single_action_space.sample() for _ in range(len(envs))]
+        actions = [envs.single_action_space.sample() for _ in range(n_envs)]
         states, _, _, _, _ = envs.step(actions)
     return states
 
