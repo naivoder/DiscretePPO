@@ -42,7 +42,7 @@ class ActorCritic(torch.nn.Module):
         x = x.view(x.size()[0], -1)
         x = torch.nn.functional.relu(self.fc1(x))
         value = self.critic(x)
-        x = torch.nn.functional.softmax(self.actor(x))
+        x = torch.nn.functional.softmax(self.actor(x), dim=1)
         action = torch.distributions.Categorical(logits=x)
         return action, value
 

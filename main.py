@@ -53,8 +53,7 @@ def run_ppo(args):
 
     states, _ = envs.reset()
     while len(history) < args.n_games:
-        with torch.no_grad():
-            apvs = [agent.choose_action(state) for state in states]
+        apvs = [agent.choose_action(state) for state in states]
         actions, probs, values = list(map(list, zip(*apvs)))
 
         next_states, rewards, term, trunc, _ = envs.step(actions)
