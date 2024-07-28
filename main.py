@@ -20,7 +20,7 @@ def run_ppo(args):
             args.env,
             shape=(84, 84),
             repeat=4,
-            clip_rewards=True,
+            clip_rewards=False,
         ).make()
 
     envs = gym.vector.AsyncVectorEnv([make_env for _ in range(args.n_envs)])
@@ -108,7 +108,6 @@ def run_ppo(args):
 def save_results(env_name, history, metrics, agent):
     save_prefix = env_name.split("/")[-1]
     utils.plot_running_avg(history, save_prefix)
-    # utils.plot_critic_val(metrics["average_critic_value"], save_prefix)
     df = pd.DataFrame(metrics)
     df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
     save_best_version(env_name, agent)
@@ -171,7 +170,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--n_epochs",
-        default=4,
+        default=10,
         type=int,
         help="Number of epochs during learning",
     )

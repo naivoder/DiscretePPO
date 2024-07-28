@@ -59,7 +59,7 @@ class DiscretePPOAgent:
         input_dims,
         n_actions,
         gamma=0.99,
-        alpha=2.5e-4,
+        alpha=3e-4,
         gae_lambda=0.95,
         policy_clip=0.1,
         batch_size=64,
@@ -130,8 +130,7 @@ class DiscretePPOAgent:
                 old_probs = prob_arr[batch]
                 advantages = advantage_arr[batch]
                 
-                dist, new_vals = self.network(states)
-                new_values = new_vals.squeeze()
+                dist, new_values = self.network(states)
 
                 new_probs = dist.log_prob(actions)
                 prob_ratio = new_probs.exp() / old_probs.exp()
