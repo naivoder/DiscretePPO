@@ -14,6 +14,7 @@ class ActorCritic(torch.nn.Module):
         self.conv3 = self._init_weights(torch.nn.Conv2d(64, 64, kernel_size=3, stride=1))
 
         self.fc1_input_dim = self._calculate_fc1_input_dim(input_dims)
+        
         self.fc1 = self._init_weights(torch.nn.Linear(self.fc1_input_dim, 512))
         self.critic = self._init_weights(torch.nn.Linear(512, 1), std=1.0)
         self.actor = self._init_weights(torch.nn.Linear(512, n_actions), std=0.01)
@@ -23,16 +24,16 @@ class ActorCritic(torch.nn.Module):
         self.to(self.device)
 
     def _init_weights(self, layer, std=np.sqrt(2), scale=False):
-        """taken from cleanrl implementation"""
+        # taken from cleanrl implementation
         torch.nn.init.orthogonal_(layer.weight, std)
         torch.nn.init.constant_(layer.bias, 0)
         return layer
 
     def _calculate_fc1_input_dim(self, input_shape):
         dummy_input = torch.zeros(1, *input_shape)
-        x = torch.nn.functional.relu(self.conv1(dummy_input))
-        x = torch.nn.functional.relu(self.conv2(x))
-        x = torch.nn.functional.relu(self.conv3(x))
+        x = self.conv1(dummy_input)
+        x = self.conv2(x)
+        x = self.conv3(x)
         return x.numel()  # count flattened elements
 
     def forward(self, x):
