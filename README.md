@@ -168,11 +168,11 @@ python main.py --env 'LunarLander-v2'
             <p><b>Krull</b></p>
             <img src="environments/KrullNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>BeamRider</b></p>
-            <img src="environments/BeamRiderNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>
         <td>
+            <p><b>Berzerk</b></p>
+            <img src="environments/BerzerkNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
             <p><b>Breakout</b></p>
             <img src="environments/BreakoutNoFrameskip-v4.gif" width="250" height="250"/>
         </td>-->
@@ -181,10 +181,10 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/KrullNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/BeamRiderNoFrameskip-v4_running_avg.png" width="250" height="250"/>
-        </td>
         <td>
+            <img src="metrics/BerzerkNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+        <!--<td>
             <img src="metrics/BreakoutNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>-->
     </tr>
