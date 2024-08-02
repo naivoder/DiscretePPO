@@ -53,20 +53,24 @@ def plot_critic_val(vals, env):
 
 
 def plot_metrics(env, metrics):
-    episodes = [m["episode"] for m in metrics]
-    avg_scores = [m["average_score"] for m in metrics]
-    avg_values = [m["average_critic_value"] for m in metrics]
+    episodes = metrics["episode"]
+    run_avg_scores = metrics["average_score"]
+    avg_values = metrics["average_critic_value"]
+
+    run_avg_vals = np.zeros_like(avg_values)
+    for i in range(len(avg_values)):
+        run_avg_vals[i] = np.mean(avg_values[max(0, i - 100) : i + 1])
 
     fig, ax1 = plt.subplots(figsize=(10, 5))
 
     ax1.set_xlabel("Episode")
     ax1.set_ylabel("Average Score", color="tab:blue")
-    ax1.plot(episodes, avg_scores, label="Average Score", color="tab:blue")
+    ax1.plot(episodes, run_avg_scores, label="Average Score", color="tab:blue")
     ax1.tick_params(axis="y", labelcolor="tab:blue")
 
     ax2 = ax1.twinx()
     ax2.set_ylabel("Average Q Value", color="tab:red")
-    ax2.plot(episodes, avg_values, label="Average Critic Value", color="tab:red")
+    ax2.plot(episodes, run_avg_vals, label="Average Critic Value", color="tab:red")
     ax2.tick_params(axis="y", labelcolor="tab:red")
 
     fig.tight_layout()
