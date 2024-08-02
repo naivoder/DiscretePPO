@@ -76,7 +76,7 @@ def plot_metrics(env, metrics):
     ax1.tick_params(axis="y", labelcolor="tab:blue")
 
     ax2 = ax1.twinx()
-    ax2.set_ylabel("Average Q Value", color="tab:red")
+    ax2.set_ylabel("Average Critic Value", color="tab:red")
     ax2.plot(episodes, run_avg_vals, label="Average Critic Value", color="tab:red")
     ax2.tick_params(axis="y", labelcolor="tab:red")
 
