@@ -1,6 +1,7 @@
 .DS_Store
 *.pt
 weights/*
+csv/*
 tovi/
 sample_state.jpg 
 

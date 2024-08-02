@@ -172,10 +172,10 @@ python main.py --env 'LunarLander-v2'
             <p><b>Berzerk</b></p>
             <img src="environments/BerzerkNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>Breakout</b></p>
-            <img src="environments/BreakoutNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+        <td>
+            <p><b>CrazyClimber</b></p>
+            <img src="environments/CrazyClimberNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -184,13 +184,66 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/BerzerkNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>
+        <td>
+            <img src="metrics/CrazyClimberNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>
+            <p><b>DemonAttack</b></p>
+            <img src="environments/DemonAttackNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>Kangaroo</b></p>
+            <img src="environments/KangarooNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>KungFuMaster</b></p>
+            <img src="environments/KungFuMasterNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/DemonAttackNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/KangarooNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/KungFuMasterNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>
+            <p><b>Zaxxon</b></p>
+            <img src="environments/ZaxxonNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
         <!--<td>
-            <img src="metrics/BreakoutNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+            <p><b>Kangaroo</b></p>
+            <img src="environments/KangarooNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>KungFuMaster</b></p>
+            <img src="environments/KungFuMasterNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/ZaxxonNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/KangarooNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/KungFuMasterNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>-->
     </tr>
 </table>
 
----
 
 ## Acknowledgements
 
