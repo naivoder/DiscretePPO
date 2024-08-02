@@ -222,11 +222,11 @@ python main.py --env 'LunarLander-v2'
             <p><b>Zaxxon</b></p>
             <img src="environments/ZaxxonNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>Kangaroo</b></p>
-            <img src="environments/KangarooNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>
         <td>
+            <p><b>Skiing</b></p>
+            <img src="environments/SkiingNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
             <p><b>KungFuMaster</b></p>
             <img src="environments/KungFuMasterNoFrameskip-v4.gif" width="250" height="250"/>
         </td>-->
@@ -235,10 +235,10 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/ZaxxonNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/KangarooNoFrameskip-v4_running_avg.png" width="250" height="250"/>
-        </td>
         <td>
+            <img src="metrics/SkiingNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+        </td>
+        <!--<td>
             <img src="metrics/KungFuMasterNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>-->
     </tr>

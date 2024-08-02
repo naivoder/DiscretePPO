@@ -5,7 +5,6 @@ import numpy as np
 import os
 import warnings
 from argparse import ArgumentParser
-import pandas as pd
 from preprocess import AtariEnv
 from ale_py import ALEInterface, LoggerMode
 from config import environments
@@ -105,15 +104,9 @@ def run_ppo(args):
         print(ep_str + g_str + avg_str + crit_str, end="\r")
 
     torch.save(agent.network.state_dict(), f"weights/{save_prefix}_final.pt")
-    save_results(args.env, metrics, agent)
-
-
-def save_results(env_name, metrics, agent):
-    save_prefix = env_name.split("/")[-1]
-    utils.plot_metrics(save_prefix, metrics)
-    df = pd.DataFrame(metrics)
-    df.to_csv(f"csv/{save_prefix}_metrics.csv", index=False)
+    
     save_best_version(env_name, agent)
+    utils.save_results(args.env, metrics, agent)
 
 
 def save_best_version(env_name, agent, seeds=100):
