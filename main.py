@@ -14,6 +14,7 @@ import torch
 warnings.simplefilter("ignore")
 ALEInterface.setLoggerMode(LoggerMode.Error)
 
+
 def run_ppo(args):
     def make_env():
         return AtariEnv(
@@ -60,13 +61,14 @@ def run_ppo(args):
 
         for j in range(args.n_envs):
             agent.remember(
-                states[j], 
-                values[j], 
-                actions[j], 
-                probs[j], 
-                rewards[j], 
-                term[j] or trunc[j])
-            
+                states[j],
+                values[j],
+                actions[j],
+                probs[j],
+                rewards[j],
+                term[j] or trunc[j],
+            )
+
             scores[j] += rewards[j]
             if term[j] or trunc[j]:
                 history.append(scores[j])
@@ -92,7 +94,7 @@ def run_ppo(args):
                 "episode": episode,
                 "average_score": avg_score,
                 "best_score": best_score,
-                "average_critic_value": avg_val
+                "average_critic_value": avg_val,
             }
         )
 
@@ -103,13 +105,14 @@ def run_ppo(args):
         print(ep_str + g_str + avg_str + crit_str, end="\r")
 
     torch.save(agent.network.state_dict(), f"weights/{save_prefix}_final.pt")
-    save_results(args.env, history, metrics, agent)
+    save_results(args.env, metrics, agent)
 
-def save_results(env_name, history, metrics, agent):
+
+def save_results(env_name, metrics, agent):
     save_prefix = env_name.split("/")[-1]
-    utils.plot_running_avg(history, save_prefix)
+    utils.plot_metrics(save_prefix, metrics)
     df = pd.DataFrame(metrics)
-    df.to_csv(f"metrics/{save_prefix}_metrics.csv", index=False)
+    df.to_csv(f"csv/{save_prefix}_metrics.csv", index=False)
     save_best_version(env_name, agent)
 
 
@@ -136,7 +139,7 @@ def save_best_version(env_name, agent, seeds=100):
         term, trunc = False, False
         while not term and not trunc:
             frames.append(env.render())
-            
+
             action, _, _ = agent.choose_action(state)
             next_state, reward, term, trunc, _ = env.step(action)
 
@@ -194,7 +197,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    for fname in ["metrics", "environments", "weights"]:
+    for fname in ["metrics", "environments", "weights", "csv"]:
         if not os.path.exists(fname):
             os.makedirs(fname)
 
