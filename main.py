@@ -184,7 +184,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--continue_training",
-        default=False,
+        default=True,
         type=bool,
         help="Continue training from saved weights.",
     )
