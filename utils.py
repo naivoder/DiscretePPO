@@ -5,9 +5,9 @@ import pandas as pd
 
 def save_results(env_name, metrics, agent):
     save_prefix = env_name.split("/")[-1]
-    plot_metrics(save_prefix, metrics)
     df = pd.DataFrame(metrics)
     df.to_csv(f"csv/{save_prefix}_metrics.csv", index=False)
+    plot_metrics(save_prefix, df)
     
 
 def collect_fixed_states(envs, n_envs, steps=5):
