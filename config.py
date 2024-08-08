@@ -11,7 +11,7 @@ environments = [
     # "BattleZoneNoFrameskip-v4",
     # "BeamRiderNoFrameskip-v4",
     # "BerzerkNoFrameskip-v4",
-    "BowlingNoFrameskip-v4",
+    # "BowlingNoFrameskip-v4",
     "BoxingNoFrameskip-v4",
     "BreakoutNoFrameskip-v4",
     "CarnivalNoFrameskip-v4",

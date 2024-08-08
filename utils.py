@@ -60,9 +60,10 @@ def plot_critic_val(vals, env):
 
 
 def plot_metrics(env, metrics):
-    episodes = metrics["episode"]
-    run_avg_scores = metrics["average_score"]
-    avg_values = metrics["average_critic_value"]
+    # episodes = np.array(metrics["episode"])
+    run_avg_scores = np.array(metrics["average_score"])
+    avg_values = np.array(metrics["average_critic_value"])
+    episodes = np.arange(len(run_avg_scores))
 
     run_avg_vals = np.zeros_like(avg_values)
     for i in range(len(avg_values)):
