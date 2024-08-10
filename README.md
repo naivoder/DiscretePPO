@@ -158,7 +158,7 @@ python main.py --env 'LunarLander-v2'
             <img src="metrics/BeamRiderNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>
         <td>
-            <img src="metrics/BreakoutNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+            <img src="metrics/BreakoutNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
     </tr>
 </table> 
@@ -249,11 +249,11 @@ python main.py --env 'LunarLander-v2'
             <p><b>Bowling</b></p>
             <img src="environments/BowlingNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>Skiing</b></p>
-            <img src="environments/SkiingNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>
         <td>
+            <p><b>Boxing</b></p>
+            <img src="environments/BoxingNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
             <p><b>MontezumaRevenge</b></p>
             <img src="environments/MontezumaRevengeNoFrameskip-v4.gif" width="250" height="250"/>
         </td>-->
@@ -262,10 +262,10 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/BowlingNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/SkiingNoFrameskip-v4_running_avg.png" width="250" height="250"/>
-        </td>
         <td>
+            <img src="metrics/BoxingNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
             <img src="metrics/MontezumaRevengeNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>-->
     </tr>
