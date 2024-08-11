@@ -253,10 +253,10 @@ python main.py --env 'LunarLander-v2'
             <p><b>Boxing</b></p>
             <img src="environments/BoxingNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>MontezumaRevenge</b></p>
-            <img src="environments/MontezumaRevengeNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+        <td>
+            <p><b>Carnival</b></p>
+            <img src="environments/CarnivalNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -265,8 +265,35 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/BoxingNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
+        <td>
+            <img src="metrics/CarnivalNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>
+            <p><b>Centipede</b></p>
+            <img src="environments/CentipedeNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
         <!--<td>
-            <img src="metrics/MontezumaRevengeNoFrameskip-v4_running_avg.png" width="250" height="250"/>
+            <p><b>Boxing</b></p>
+            <img src="environments/BoxingNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>Carnival</b></p>
+            <img src="environments/CarnivalNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/CentipedeNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/BoxingNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/CarnivalNoFrameskip-v4_running_avg.png" width="250" height="250"/>
         </td>-->
     </tr>
 </table>
