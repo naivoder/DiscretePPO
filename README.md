@@ -6,7 +6,7 @@
 
 This repository contains an implementation of Proximal Policy Optimization (PPO) for discrete action spaces, which has been evaluated against a variety of Gymnasium and Atari environments.  
 
-The main script in its current form is configured for Atari environments, with a custom environment wrapper that follows the approach outlined in the original DQN paper. For this reason, it is recommended to use the 'NoFrameskip' versions of the environments. 
+The main script in its current form is configured for Atari environments, with a custom environment wrapper that follows the approach outlined in the original DQN paper (for this reason, it is recommended to use the 'NoFrameskip' versions of the environments).  
 
 ## Setup
 
@@ -23,10 +23,16 @@ pip install -r requirements.txt
 You can run the algorithm on any supported Gymnasium environment. For example:
 
 ```bash
-python main.py --env 'LunarLander-v2'
+python main.py --env 'MsPacmanNoFrameskip-v4'
 ```
 
----
+## Results
+#### 🤔 For your consideration: 
+The Atari environments were trained for 20000 games. I regret this decision as it lead to inconsistent numbers of learning steps between environments (due to some games requiring more/less steps per game).  
+
+I also did not use reward scaling, which I use for most other algorithms. This was a nearly arbitrary decision that came about due to initial debugging - at a certain point things suddenly began to work so I just kinda rolled with it...
+
+I only started tracking the average critic value for a set of fixed states after many environments had already been trained, but I feel that this provides an additional interesting piece of context. 
 
 <table>
     <tr>
