@@ -4,8 +4,9 @@
 
 🚧 🛠️👷‍♀️ 🛑 Under construction...
 
-Poor learning on lots of environments even when using the NoFrameskip envs...  
-Reading lots of commentary on how the authors used a bunch of tricks they didn't include in the paper. I might have to do some fancier stuff to ensure the models learn effectively 🧐
+This repository contains an implementation of Proximal Policy Optimization (PPO) for discrete action spaces, which has been evaluated against a variety of Gymnasium and Atari environments.  
+
+The main script in its current form is configured for Atari environments, with a custom environment wrapper that follows the approach outlined in the original DQN paper. For this reason, it is recommended to use the 'NoFrameskip' versions of the environments. 
 
 ## Setup
 
@@ -280,10 +281,10 @@ python main.py --env 'LunarLander-v2'
             <p><b>ChopperCommand</b></p>
             <img src="environments/ChopperCommandNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>Carnival</b></p>
-            <img src="environments/CarnivalNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+        <td>
+            <p><b>Defender</b></p>
+            <img src="environments/DefenderNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -292,11 +293,12 @@ python main.py --env 'LunarLander-v2'
         <td>
             <img src="metrics/ChopperCommandNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/CarnivalNoFrameskip-v4_running_avg.png" width="250" height="250"/>
-        </td>-->
+        <td>
+            <img src="metrics/DefenderNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
     </tr>
 </table>
+
 
 
 ## Acknowledgements
