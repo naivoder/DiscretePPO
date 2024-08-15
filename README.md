@@ -304,7 +304,33 @@ I only started tracking the average critic value for a set of fixed states after
         </td>
     </tr>
 </table>
-
+<table>
+    <tr>
+        <td>
+            <p><b>DoubleDunk</b></p>
+            <img src="environments/DoubleDunkNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <p><b>ChopperCommand</b></p>
+            <img src="environments/ChopperCommandNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>Defender</b></p>
+            <img src="environments/DefenderNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/DoubleDunkNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/ChopperCommandNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/DefenderNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>-->
+    </tr>
+</table>
 
 
 ## Acknowledgements
