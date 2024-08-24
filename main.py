@@ -49,7 +49,7 @@ def run_ppo(args):
     scores = np.zeros(args.n_envs)
 
     history, metrics = [], []
-    n_steps, episode = 0, 0
+    n_steps = 0
 
     states, _ = envs.reset()
     while len(history) < args.n_games:
@@ -90,9 +90,7 @@ def run_ppo(args):
 
         metrics.append(
             {
-                "episode": episode,
                 "average_score": avg_score,
-                "best_score": best_score,
                 "average_critic_value": avg_val,
             }
         )
