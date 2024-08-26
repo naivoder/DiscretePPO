@@ -337,11 +337,11 @@ I only started tracking the average critic value for a set of fixed states after
             <p><b>SpaceInvaders</b></p>
             <img src="environments/SpaceInvadersNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>NameThisGame</b></p>
-            <img src="environments/NameThisGameNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>
         <td>
+            <p><b>Phoenix</b></p>
+            <img src="environments/PhoenixNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
             <p><b>Solaris</b></p>
             <img src="environments/SolarisNoFrameskip-v4.gif" width="250" height="250"/>
         </td>-->
@@ -350,10 +350,10 @@ I only started tracking the average critic value for a set of fixed states after
         <td>
             <img src="metrics/SpaceInvadersNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/NameThisGameNoFrameskip-v4_metrics.png" width="250" height="250"/>
-        </td>
         <td>
+            <img src="metrics/PhoenixNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
             <img src="metrics/SolarisNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>-->
     </tr>
