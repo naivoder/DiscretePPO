@@ -358,6 +358,33 @@ I only started tracking the average critic value for a set of fixed states after
         </td>
     </tr>
 </table>
+<table>
+    <tr>
+        <td>
+            <p><b>Pitfall</b></p>
+            <img src="environments/PitfallNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>Tennis</b></p>
+            <img src="environments/TennisNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <p><b>StarGunner</b></p>
+            <img src="environments/StarGunnerNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/PitfallNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/TennisNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/StarGunnerNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>-->
+    </tr>
+</table>
 
 
 ## Acknowledgements
