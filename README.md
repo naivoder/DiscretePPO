@@ -368,10 +368,10 @@ I only started tracking the average critic value for a set of fixed states after
             <p><b>Tennis</b></p>
             <img src="environments/TennisNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>StarGunner</b></p>
-            <img src="environments/StarGunnerNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+        <td>
+            <p><b>Pong</b></p>
+            <img src="environments/PongNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -380,8 +380,35 @@ I only started tracking the average critic value for a set of fixed states after
         <td>
             <img src="metrics/TennisNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
+        <td>
+            <img src="metrics/PongNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>
+            <p><b>Pooyan</b></p>
+            <img src="environments/PooyanNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
         <!--<td>
-            <img src="metrics/StarGunnerNoFrameskip-v4_metrics.png" width="250" height="250"/>
+            <p><b>Tennis</b></p>
+            <img src="environments/TennisNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>Pong</b></p>
+            <img src="environments/PongNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/PooyanNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/TennisNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/PongNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>-->
     </tr>
 </table>
