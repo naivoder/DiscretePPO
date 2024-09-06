@@ -395,10 +395,10 @@ I only started tracking the average critic value for a set of fixed states after
             <p><b>TimePilot</b></p>
             <img src="environments/TimePilotNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>Pong</b></p>
-            <img src="environments/PongNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+        <td>
+            <p><b>Tutankham</b></p>
+            <img src="environments/TutankhamNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -407,9 +407,9 @@ I only started tracking the average critic value for a set of fixed states after
         <td>
             <img src="metrics/TimePilotNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/PongNoFrameskip-v4_metrics.png" width="250" height="250"/>
-        </td>-->
+        <td>
+            <img src="metrics/TutankhamNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
     </tr>
 </table>
 
