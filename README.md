@@ -412,6 +412,33 @@ I only started tracking the average critic value for a set of fixed states after
         </td>
     </tr>
 </table>
+<table>
+    <tr>
+        <td>
+            <p><b>Enduro</b></p>
+            <img src="environments/EnduroNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>UpNDown</b></p>
+            <img src="environments/UpNDownNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <p><b>Tutankham</b></p>
+            <img src="environments/TutankhamNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/EnduroNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/UpNDownNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/TutankhamNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>-->
+    </tr>
+</table>
 
 
 ## Acknowledgements
