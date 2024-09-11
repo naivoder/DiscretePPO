@@ -21,7 +21,7 @@ environments = [
     # "DefenderNoFrameskip-v4",
     # "DemonAttackNoFrameskip-v4",
     # "DoubleDunkNoFrameskip-v4",
-    "ElevatorActionNoFrameskip-v4", # Screen 1
+    # "ElevatorActionNoFrameskip-v4", # Screen 1
     # "EnduroNoFrameskip-v4", 
     # "FishingDerbyNoFrameskip-v4",   # Screen 4
     # "FreewayNoFrameskip-v4",    # Screen 4
@@ -46,8 +46,8 @@ environments = [
     # "QbertNoFrameskip-v4",  
     # "RiverraidNoFrameskip-v4",  # Screen 3
     # "RoadRunnerNoFrameskip-v4", # Screen 3
-    # "RobotTankNoFrameskip-v4",  # Screen 3
-    # "SeaquestNoFrameskip-v4",   # Screen 3
+    "RobotankNoFrameskip-v4",  # Screen 3
+    "SeaquestNoFrameskip-v4",   # Screen 3
     # "SkiingNoFrameskip-v4",
     # "SolarisNoFrameskip-v4",  
     # "SpaceInvadersNoFrameskip-v4", 
