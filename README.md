@@ -445,25 +445,25 @@ I only started tracking the average critic value for a set of fixed states after
             <p><b>Qbert</b></p>
             <img src="environments/QbertNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>UpNDown</b></p>
-            <img src="environments/UpNDownNoFrameskip-v4.gif" width="250" height="250"/>
+        <td>
+            <p><b>Riverraid</b></p>
+            <img src="environments/RiverraidNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
         <td>
-            <p><b>PrivateEye</b></p>
-            <img src="environments/PrivateEyeNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+            <p><b>RoadRunner</b></p>
+            <img src="environments/RoadRunnerNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-
     </tr>
     <tr>
         <td>
             <img src="metrics/QbertNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/UpNDownNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        <td>
+            <img src="metrics/RiverraidNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
         <td>
-            <img src="metrics/PrivateEyeNoFrameskip-v4_metrics.png" width="250" height="250"/>
-        </td>-->
+            <img src="metrics/RoadRunnerNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
     </tr>
 </table>
 
