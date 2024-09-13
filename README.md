@@ -452,7 +452,7 @@ I only started tracking the average critic value for a set of fixed states after
         <td>
             <p><b>RoadRunner</b></p>
             <img src="environments/RoadRunnerNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-
+        </td>
     </tr>
     <tr>
         <td>
@@ -464,6 +464,33 @@ I only started tracking the average critic value for a set of fixed states after
         <td>
             <img src="metrics/RoadRunnerNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>
+            <p><b>FishingDerby</b></p>
+            <img src="environments/FishingDerbyNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>Venture</b></p>
+            <img src="environments/VentureNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <p><b>RoadRunner</b></p>
+            <img src="environments/RoadRunnerNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/FishingDerbyNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/VentureNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/RoadRunnerNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>-->
     </tr>
 </table>
 
