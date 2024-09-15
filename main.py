@@ -103,7 +103,7 @@ def run_ppo(args):
 
     torch.save(agent.network.state_dict(), f"weights/{save_prefix}_final.pt")
     
-    save_best_version(env_name, agent)
+    save_best_version(args.env, agent)
     utils.save_results(args.env, metrics, agent)
 
 
