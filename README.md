@@ -503,10 +503,10 @@ I only started tracking the average critic value for a set of fixed states after
             <p><b>Robotank</b></p>
             <img src="environments/RobotankNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>ElevatorAction</b></p>
-            <img src="environments/ElevatorActionNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+        <td>
+            <p><b>Frostbite</b></p>
+            <img src="environments/FrostbiteNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -515,9 +515,9 @@ I only started tracking the average critic value for a set of fixed states after
         <td>
             <img src="metrics/RobotankNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/ElevatorActionNoFrameskip-v4_metrics.png" width="250" height="250"/>
-        </td>-->
+        <td>
+            <img src="metrics/FrostbiteNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
     </tr>
 </table>
 
