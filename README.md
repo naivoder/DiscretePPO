@@ -526,28 +526,54 @@ I only started tracking the average critic value for a set of fixed states after
             <p><b>VideoPinball</b></p>
             <img src="environments/VideoPinballNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>Robotank</b></p>
-            <img src="environments/RobotankNoFrameskip-v4.gif" width="250" height="250"/>
+        <td>
+            <p><b>Gopher</b></p>
+            <img src="environments/GopherNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
         <td>
-            <p><b>Frostbite</b></p>
-            <img src="environments/FrostbiteNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+            <p><b>Gravitar</b></p>
+            <img src="environments/GravitarNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
             <img src="metrics/VideoPinballNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/RobotankNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        <td>
+            <img src="metrics/GopherNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
         <td>
-            <img src="metrics/FrostbiteNoFrameskip-v4_metrics.png" width="250" height="250"/>
+            <img src="metrics/GravitarNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>
+            <p><b>WizardOfWor</b></p>
+            <img src="environments/WizardOfWorNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <p><b>Gopher</b></p>
+            <img src="environments/GopherNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+        <td>
+            <p><b>Gravitar</b></p>
+            <img src="environments/GravitarNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>-->
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/WizardOfWorNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <!--<td>
+            <img src="metrics/GopherNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+        <td>
+            <img src="metrics/GravitarNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>-->
     </tr>
 </table>
-
 
 ## Acknowledgements
 
