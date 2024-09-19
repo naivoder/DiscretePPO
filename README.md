@@ -557,10 +557,10 @@ I only started tracking the average critic value for a set of fixed states after
             <p><b>Hero</b></p>
             <img src="environments/HeroNoFrameskip-v4.gif" width="250" height="250"/>
         </td>
-        <!--<td>
-            <p><b>Gravitar</b></p>
-            <img src="environments/GravitarNoFrameskip-v4.gif" width="250" height="250"/>
-        </td>-->
+        <td>
+            <p><b>YarsRevenge</b></p>
+            <img src="environments/YarsRevengeNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
     </tr>
     <tr>
         <td>
@@ -569,9 +569,9 @@ I only started tracking the average critic value for a set of fixed states after
         <td>
             <img src="metrics/HeroNoFrameskip-v4_metrics.png" width="250" height="250"/>
         </td>
-        <!--<td>
-            <img src="metrics/GravitarNoFrameskip-v4_metrics.png" width="250" height="250"/>
-        </td>-->
+        <td>
+            <img src="metrics/YarsRevengeNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
     </tr>
 </table>
 
