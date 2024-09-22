@@ -601,6 +601,19 @@ I only started tracking the average critic value for a set of fixed states after
         </td>
     </tr>
 </table>
+<table>
+    <tr>
+        <td>
+            <p><b>JourneyEscape</b></p>
+            <img src="environments/JourneyEscapeNoFrameskip-v4.gif" width="250" height="250"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="metrics/JourneyEscapeNoFrameskip-v4_metrics.png" width="250" height="250"/>
+        </td>
+    </tr>
+</table>
 
 ## Acknowledgements
 
